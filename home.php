@@ -188,14 +188,14 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
                 <div class="search-box shadow-lg">
 
 
-                    <form method="GET" action="home.php#marketplace">
+                    <form method="GET" action="home.php#marketplace" id="filterForm">
 
                         <div class="row g-2 align-items-center justify-content-center">
 
                             <!-- Desa -->
                             <div class="col-xl col-lg-2 col-md-4">
 
-                                <select name="lokasi" class="form-select">
+                                <select name="lokasi" id="lokasi" class="form-select live-filter">
 
                                     <option value="">Semua Dusun</option>
 
@@ -232,14 +232,14 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
                             <!-- Hewan -->
                             <div class="col-xl col-lg-2 col-md-4">
 
-                                <select id="hewan" name="hewan" class="form-select">
+                                <select id="hewan" name="hewan" class="form-select live-filter">
 
                                     <option value="">Pilih Hewan</option>
-                                    <option value="Sapi">Sapi</option>
-                                    <option value="Kambing">Kambing</option>
-                                    <option value="Domba">Domba</option>
-                                    <option value="Burung">Burung</option>
-                                    <option value="Ayam">Ayam</option>
+                                    <option value="Sapi" <?= (isset($_GET['hewan']) && $_GET['hewan'] === 'Sapi') ? 'selected' : ''; ?>>Sapi</option>
+                                    <option value="Kambing" <?= (isset($_GET['hewan']) && $_GET['hewan'] === 'Kambing') ? 'selected' : ''; ?>>Kambing</option>
+                                    <option value="Domba" <?= (isset($_GET['hewan']) && $_GET['hewan'] === 'Domba') ? 'selected' : ''; ?>>Domba</option>
+                                    <option value="Burung" <?= (isset($_GET['hewan']) && $_GET['hewan'] === 'Burung') ? 'selected' : ''; ?>>Burung</option>
+                                    <option value="Ayam" <?= (isset($_GET['hewan']) && $_GET['hewan'] === 'Ayam') ? 'selected' : ''; ?>>Ayam</option>
 
                                 </select>
 
@@ -248,9 +248,12 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
                             <!-- Ras -->
                             <div class="col-xl col-lg-2 col-md-4">
 
-                                <select class="form-select" name="ras" id="ras">
+                                <select class="form-select live-filter" name="ras" id="ras">
 
                                     <option value="">Pilih Ras</option>
+                                    <?php if (!empty($_GET['ras'])): ?>
+                                        <option value="<?= htmlspecialchars($_GET['ras']); ?>" selected><?= htmlspecialchars($_GET['ras']); ?></option>
+                                    <?php endif; ?>
 
                                 </select>
 
@@ -258,7 +261,7 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
 
                             <div class="col-xl col-lg-2 col-md-4">
 
-                                <select name="peternak" class="form-select">
+                                <select name="peternak" id="peternak" class="form-select live-filter">
 
                                     <option value="">Semua Peternak</option>
 
@@ -272,11 +275,11 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
         ");
 
                                     while ($p = mysqli_fetch_assoc($peternak)) {
-
+                                        $selected = (isset($_GET['peternak']) && (int)$_GET['peternak'] === (int)$p['id']) ? "selected" : "";
                                     ?>
 
-                                        <option value="<?= $p['id'] ?>">
-                                            <?= $p['nama'] ?>
+                                        <option value="<?= $p['id'] ?>" <?= $selected; ?>>
+                                            <?= htmlspecialchars($p['nama']); ?>
                                         </option>
 
                                     <?php } ?>
@@ -285,14 +288,14 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
 
                             </div>
 
-                            <!-- Tombol -->
-                            <div class="col-xl col-lg-2 col-md-4">
+                            <!-- Tombol Reset / Submit -->
+                            <div class="col-xl col-lg-2 col-md-4 d-flex gap-2">
 
-                                <button type="submit" class="btn btn-green w-100">
-
+                                <button type="submit" class="btn btn-green w-100" title="Cari">
                                     <i class="bi bi-search"></i>
-
-
+                                </button>
+                                <button type="button" id="btnResetFilter" class="btn btn-outline-secondary" title="Reset Filter">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
                                 </button>
 
                             </div>
@@ -302,295 +305,22 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
                     </form>
 
                 </div>
-                </p>
             </div>
 
-
-            <!-- CARD -->
-            <div class="row g-4">
-
-                <?php
-
-                // PAGINATION
-                $limit = 9; // 9 hewan per halaman
-
-                $page = isset($_GET['page']) ? $_GET['page'] : 1;
-
-                $start = ($page - 1) * $limit;
-
-
-                $where = "WHERE hewan.status_arsip = 0";
-
-
-                // FILTER DUSUN
-                if (!empty($_GET['lokasi'])) {
-
-                    $lokasi = mysqli_real_escape_string(
-                        $conn,
-                        $_GET['lokasi']
-                    );
-
-                    $where .= "
-    AND users.alamat LIKE '%$lokasi%'
-    ";
-                }
-
-
-
-                // FILTER HEWAN
-                if (isset($_GET['hewan']) && $_GET['hewan'] != '') {
-
-                    $hewan = mysqli_real_escape_string(
-                        $conn,
-                        $_GET['hewan']
-                    );
-
-                    $where .= "
-    AND hewan.nama_hewan LIKE '%$hewan%'
-    ";
-                }
-
-
-
-                // FILTER RAS
-                if (!empty($_GET['ras'])) {
-
-                    $ras = mysqli_real_escape_string(
-                        $conn,
-                        $_GET['ras']
-                    );
-
-                    $where .= "
-    AND hewan.ras='$ras'
-    ";
-                }
-
-
-
-                // FILTER PETERNAK
-                if (isset($_GET['peternak']) && $_GET['peternak'] != '') {
-
-                    $peternak = mysqli_real_escape_string(
-                        $conn,
-                        $_GET['peternak']
-                    );
-
-                    $where .= "
-    AND hewan.user_id='$peternak'
-    ";
-                }
-
-                // HITUNG TOTAL DATA
-                $count = mysqli_query($conn, "
-SELECT COUNT(*) as total
-FROM hewan
-JOIN users
-ON hewan.user_id = users.id
-$where
-");
-
-                $totalData = mysqli_fetch_assoc($count)['total'];
-                $totalPage = ceil($totalData / $limit);
-
-                // AMBIL DATA SESUAI HALAMAN
-                $query = mysqli_query($conn, "
-SELECT 
-    hewan.*, 
-    users.nama,
-    users.wa,
-    users.alamat
-FROM hewan
-JOIN users
-ON hewan.user_id = users.id
-$where
-ORDER BY hewan.updated_at DESC
-LIMIT $start, $limit
-");
-
-                // Pesan jika tidak ada data hewan
-                if (mysqli_num_rows($query) == 0) {
-                    echo "
-    <div class='col-12 text-center'>
-        <div class='alert alert-warning'>
-            Hewan tidak ditemukan
-        </div>
-    </div>
-    ";
-                }
-
-                // Looping daftar hewan di marketplace
-                while ($data = mysqli_fetch_assoc($query)) {
-                ?>
-                    <div class="col-lg-4 col-md-6">
-                        <div class="card animal-card h-100 <?php echo $data['status'] == 'Terjual' ? 'opacity-50' : ''; ?>">
-                            <div class="position-relative">
-
-                                <img src="images/hewan/<?php echo $data['foto']; ?>"
-                                    class="card-img-top"
-                                    style="height:250px; object-fit:cover;">
-
-                                <?php if ($data['status'] == 'Terjual') { ?>
-
-                                    <div class="sold-label">
-                                        TERJUAL
-                                    </div>
-
-                                <?php } ?>
-
-
-                            </div>
-
-                            <div class="card-body p-4">
-
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-
-                                    <span class="badge 
-        <?php echo $data['status'] == 'Tersedia' ? 'bg-success' : 'bg-danger'; ?>">
-
-                                        <?php echo $data['status']; ?>
-
-                                    </span>
-
-                                    <span class="badge-weight">
-                                        <?php
-                                        echo rtrim(rtrim(number_format($data['berat'], 2, ',', '.'), '0'), ',');
-                                        echo ' ' . $data['satuan_berat'];
-                                        ?>
-                                    </span>
-
-                                </div>
-
-                                <?php
-                                $desa = trim(explode(',', $data['alamat'])[0]);
-                                ?>
-
-                                <small class="text-muted">
-                                    📍 <?php echo $data['alamat']; ?>
-                                </small>
-
-                                <h4 class="fw-bold mt-3">
-                                    <?php echo $data['nama_hewan']; ?>
-                                </h4>
-
-                                <p class="text-success mb-1">
-                                    <strong>Ras :</strong> <?php echo $data['ras']; ?>
-                                </p>
-
-                                <p class="text-muted mb-2">
-                                    <?php echo $data['nama']; ?>
-                                </p>
-
-                                <div class="price mb-4">
-                                    Rp <?php echo number_format($data['harga']); ?>
-                                </div>
-
-                                <div class="d-flex gap-2">
-
-                                    <a href="detail.php?id=<?php echo $data['id']; ?>"
-                                        class="btn btn-outline-success w-50">
-
-                                        Detail
-
-                                    </a>
-
-                                    <?php if ($data['status'] == 'Tersedia') { ?>
-
-                                        <a href="https://wa.me/62<?php echo ltrim($data['wa'], '0'); ?>?text=Saya tertarik dengan <?php echo $data['nama_hewan']; ?>"
-                                            target="_blank"
-                                            class="btn btn-success w-50">
-
-                                            <i class="bi bi-whatsapp"></i>
-
-                                            Chat
-
-                                        </a>
-
-                                    <?php } else { ?>
-
-                                        <button class="btn btn-secondary w-50" disabled>
-
-                                            Sudah Terjual
-
-                                        </button>
-
-                                    <?php } ?>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                <?php } ?>
-
-
-                <!-- PAGINATION -->
-
-                <div class="col-12">
-
-                    <nav>
-                        <ul class="pagination justify-content-center mt-5">
-
-
-                            <?php if ($page > 1) { ?>
-
-                                <li class="page-item">
-
-                                    <a class="page-link"
-                                        href="?page=<?= $page - 1 ?>#marketplace">
-
-                                        Sebelumnya
-
-                                    </a>
-
-                                </li>
-
-                            <?php } ?>
-
-
-
-                            <?php for ($i = 1; $i <= $totalPage; $i++) { ?>
-
-                                <li class="page-item <?= ($page == $i) ? 'active' : '' ?>">
-
-                                    <a class="page-link"
-                                        href="?page=<?= $i ?>#marketplace">
-
-                                        <?= $i ?>
-
-                                    </a>
-
-                                </li>
-
-
-                            <?php } ?>
-
-
-
-                            <?php if ($page < $totalPage) { ?>
-
-                                <li class="page-item">
-
-                                    <a class="page-link"
-                                        href="?page=<?= $page + 1 ?>#marketplace">
-
-                                        Selanjutnya
-
-                                    </a>
-
-                                </li>
-
-                            <?php } ?>
-
-
-                        </ul>
-                    </nav>
-
+            <!-- LOADER -->
+            <div id="marketplaceLoader" class="text-center py-5" style="display: none;">
+                <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Memuat data...</span>
                 </div>
+                <p class="text-muted mt-2 fw-semibold">Memuat daftar hewan...</p>
+            </div>
 
+            <!-- CARD GRID (AJAX Content) -->
+            <div class="row g-4" id="marketplaceGrid">
+                <?php include 'ajax_marketplace.php'; ?>
+            </div>
 
+        </div>
 
     </section>
 
@@ -1282,7 +1012,105 @@ LIMIT $start, $limit
 
             }
 
+            fetchMarketplace(1);
+
         };
+
+        // ==========================================
+        // Live AJAX Search & Filter Marketplace
+        // ==========================================
+        const filterForm = document.getElementById('filterForm');
+        const marketplaceGrid = document.getElementById('marketplaceGrid');
+        const marketplaceLoader = document.getElementById('marketplaceLoader');
+        const btnResetFilter = document.getElementById('btnResetFilter');
+
+        function bindCardTilt() {
+            document.querySelectorAll('.animal-card').forEach(function(card){
+                card.addEventListener('mousemove', function(e){
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const rotateX = ((y / rect.height) - 0.5) * -8;
+                    const rotateY = ((x / rect.width) - 0.5) * 8;
+                    card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px)`;
+                });
+                card.addEventListener('mouseleave', function(){
+                    card.style.transform = '';
+                });
+            });
+        }
+
+        async function fetchMarketplace(page = 1) {
+            const formData = new FormData(filterForm);
+            const params = new URLSearchParams(formData);
+            params.set('page', page);
+
+            // Update URL browser tanpa me-refresh halaman
+            const newUrl = window.location.pathname + '?' + params.toString() + '#marketplace';
+            window.history.pushState({ path: newUrl }, '', newUrl);
+
+            if (marketplaceLoader) marketplaceLoader.style.display = 'block';
+            if (marketplaceGrid) marketplaceGrid.style.opacity = '0.35';
+
+            try {
+                const response = await fetch('ajax_marketplace.php?' + params.toString());
+                if (response.ok) {
+                    const html = await response.text();
+                    if (marketplaceGrid) {
+                        marketplaceGrid.innerHTML = html;
+                        bindCardTilt();
+                        attachPaginationEvents();
+                    }
+                }
+            } catch (err) {
+                console.warn('Gagal memuat data marketplace asinkron:', err);
+            } finally {
+                if (marketplaceLoader) marketplaceLoader.style.display = 'none';
+                if (marketplaceGrid) marketplaceGrid.style.opacity = '1';
+            }
+        }
+
+        function attachPaginationEvents() {
+            document.querySelectorAll('.ajax-page-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetPage = this.getAttribute('data-page') || 1;
+                    fetchMarketplace(targetPage);
+                    const marketElem = document.getElementById('marketplace');
+                    if (marketElem) {
+                        marketElem.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+        }
+
+        // Live filter listener untuk select selain dropdown hewan
+        document.querySelectorAll('.live-filter').forEach(select => {
+            if (select.id !== 'hewan') {
+                select.addEventListener('change', function() {
+                    fetchMarketplace(1);
+                });
+            }
+        });
+
+        if (filterForm) {
+            filterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                fetchMarketplace(1);
+            });
+        }
+
+        if (btnResetFilter) {
+            btnResetFilter.addEventListener('click', function() {
+                filterForm.reset();
+                document.getElementById('ras').innerHTML = "<option value=''>Pilih Ras</option>";
+                fetchMarketplace(1);
+            });
+        }
+
+        // Inisialisasi awal
+        bindCardTilt();
+        attachPaginationEvents();
 
         // Registrasi Service Worker PWA
         if ('serviceWorker' in navigator) {

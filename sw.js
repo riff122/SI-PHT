@@ -1,7 +1,8 @@
-const CACHE_NAME = 'ternakapp-cache-v1';
+const CACHE_NAME = 'ternakapp-cache-v2';
 const STATIC_ASSETS = [
     './',
     'home.php',
+    'ajax_marketplace.php',
     'style.css',
     'offline.html',
     'manifest.json',
