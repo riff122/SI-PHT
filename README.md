@@ -75,22 +75,97 @@ Platform ini menyelesaikan dua masalah utama:
 
 ---
 
-## 🔄 Alur Kerja Sistem
+## 🔄 Diagram Alur Sistem & ERD
 
-```text
-  [ Pembeli / Konsumen ]
-           │
-           ▼
-  [ Halaman Marketplace ] ──(Filter Dusun / Ras / Harga)──► [ Detail Hewan ]
-                                                                   │
-                                     ┌─────────────────────────────┴──────────────────────────────┐
-                                     ▼                                                            ▼
-                           [ Buka Google Maps ]                                       [ Chat WhatsApp Peternak ]
-                        (Navigasi Menuju Kandang)                                        (Negosiasi & Transaksi)
+### 📊 1. Alur Interaksi Pengguna (User Flow)
 
+```mermaid
+flowchart TD
+    subgraph Publik["🌐 Marketplace & Publik"]
+        A["Pembeli / Konsumen"] --> B["Halaman Home & Marketplace"]
+        B --> C["Filter Dusun, Ras, Kategori, Peternak"]
+        C --> D["Halaman Detail Hewan"]
+        D --> E["📍 Buka Google Maps (Navigasi Kandang)"]
+        D --> F["💬 Chat WhatsApp Peternak (Direct Link)"]
+    end
 
-  [ Peternak ] ────► [ Dashboard Peternak ] ────► [ Kelola Hewan & Foto ] ────► [ Catat Pengeluaran & Profit ]
-  [ Admin ]    ────► [ Dashboard Admin ]    ────► [ Kelola User & Ternak ] ────► [ Arsip Ternak Terjual ]
+    subgraph Peternak["👨‍🌾 Panel Peternak"]
+        P["Peternak"] --> P1["Login / Registrasi"]
+        P1 --> P2["Dashboard Peternak"]
+        P2 --> P3["Posting Hewan Baru (Multi-Foto 4-6 & GPS)"]
+        P2 --> P4["Catat Pengeluaran (Pakan / Obat)"]
+        P2 --> P5["Grafik Finansial & Kalkulator Profit"]
+    end
+
+    subgraph Admin["🛡️ Panel Administrator"]
+        AD["Administrator"] --> AD1["Login Admin"]
+        AD1 --> AD2["Dashboard Admin"]
+        AD2 --> AD3["Kelola Pengguna (Aktivasi / Hapus Akun)"]
+        AD2 --> AD4["Monitoring Postingan Ternak"]
+        AD2 --> AD5["Arsip & Pulihkan Ternak Terjual"]
+    end
+```
+
+### 🗄️ 2. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    USERS ||--o{ HEWAN : "memiliki"
+    USERS ||--o{ PENGELUARAN : "mencatat"
+    HEWAN ||--o{ HEWAN_FOTO : "memiliki galeri"
+    HEWAN ||--o{ PENGELUARAN : "memiliki biaya"
+
+    USERS {
+        int id PK
+        string nama
+        string email UK
+        string wa
+        string alamat
+        string desa
+        string password
+        string role "admin / peternak"
+        string status "aktif / tidak_aktif"
+        string foto
+        datetime last_login
+        datetime created_at
+    }
+
+    HEWAN {
+        int id PK
+        int user_id FK
+        string nama_hewan
+        string ras
+        string jenis "Jantan / Betina"
+        decimal berat
+        string satuan_berat "kg / gram"
+        string umur
+        decimal harga
+        text deskripsi
+        string latitude
+        string longitude
+        string foto
+        string status "Tersedia / Terjual"
+        boolean status_arsip
+        datetime tanggal_terjual
+        datetime created_at
+        datetime updated_at
+    }
+
+    HEWAN_FOTO {
+        int id PK
+        int hewan_id FK
+        string foto
+    }
+
+    PENGELUARAN {
+        int id PK
+        int hewan_id FK
+        int user_id FK
+        string nama_pengeluaran
+        decimal nominal
+        date tanggal
+        text keterangan
+    }
 ```
 
 ---
