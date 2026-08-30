@@ -1,64 +1,134 @@
-# 🐄 TernakApp — Sistem Informasi Penjualan Hewan Ternak (SI-PHT)
+<div align="center">
 
-Platform marketplace dan manajemen ternak berbasis web yang menghubungkan peternak lokal secara langsung dengan pembeli tanpa perantara di wilayah Kemalang, Klaten, dan sekitarnya.
+  # 🐄 TernakApp (SI-PHT)
+  ### **Sistem Informasi Penjualan Hewan Ternak & Manajemen Finansial Peternakan**
 
----
+  <p align="center">
+    <b>Platform Marketplace Digital yang Menghubungkan Pembeli dengan Peternak Lokal Tanpa Perantara</b>
+  </p>
 
-## 🌟 Fitur Utama
+  <p align="center">
+    <img src="https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP Version" />
+    <img src="https://img.shields.io/badge/MySQL-8.0%2B-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL" />
+    <img src="https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white" alt="Bootstrap 5" />
+    <img src="https://img.shields.io/badge/Code%20Style-PSR--12-brightgreen?style=for-the-badge" alt="PSR-12" />
+    <img src="https://img.shields.io/badge/Security-Prepared%20Statements-blue?style=for-the-badge" alt="Security" />
+  </p>
 
-### 🛒 1. Marketplace & Publik
-- **Katalog Hewan Ternak**: Menampilkan daftar sapi, kambing, domba, ayam, dan unggas yang tersedia lengkap dengan foto, ras, berat, umur, dan harga.
-- **Multi-Filter & Pencarian**: Filter pencarian berdasarkan Dusun/Lokasi, Kategori Hewan, Ras, dan Nama Peternak.
-- **Detail Hewan & Galeri**: Pratinjau galeri foto interaktif, informasi spesifikasi ternak, dan profil peternak.
-- **Integrasi WhatsApp & GPS**: Tautan langsung pesan WhatsApp ke peternak dengan format otomatis dan navigasi peta Google Maps.
+  <p align="center">
+    <a href="#-tentang-proyek">Tentang Proyek</a> •
+    <a href="#-fitur-unggulan">Fitur Unggulan</a> •
+    <a href="#-alur-sistem">Alur Sistem</a> •
+    <a href="#-panduan-instalasi">Panduan Instalasi</a> •
+    <a href="#-akun-demo">Akun Demo</a> •
+    <a href="#-struktur-folder">Struktur Folder</a>
+  </p>
 
-### 👨‍🌾 2. Dashboard Peternak
-- **Manajemen Hewan**: Tambah, edit, dan hapus data hewan ternak.
-- **Multi-Upload Foto**: Upload 4 hingga 6 foto sekaligus dengan validasi ekstensi aman dan pratinjau instan.
-- **Pencatatan Finansial & Pengeluaran**: Catat biaya pakan, vaksin, obat-obatan, dan operasional per ekor hewan.
-- **Kalkulator Profit / Loss**: Perhitungan otomatis margin keuntungan/kerugian secara akurat (`Harga Jual - Total Pengeluaran`).
-- **Statistik & Grafik Interaktif**: Visualisasi tren penjualan bulanan dan performa finansial menggunakan Chart.js.
-
-### 🛡️ 3. Dashboard Administrator
-- **Manajemen Pengguna**: Pantau, aktifkan, nonaktifkan, atau hapus akun pengguna (dengan proteksi anti self-deletion admin).
-- **Manajemen Data Ternak**: Monitoring seluruh postingan ternak dari semua peternak terdaftar.
-- **Sistem Pengarsipan**: Fitur arsip data hewan yang sudah terjual untuk menjaga kebersihan data aktif serta kemampuan pemulihan (unarchive).
-
----
-
-## 🔒 Keamanan & Standar Kode
-
-- **Prepared Statements**: Seluruh kueri SQL menggunakan `mysqli_prepare` untuk mencegah celah SQL Injection.
-- **Proteksi IDOR**: Validasi hak kepemilikan data (`WHERE id = ? AND user_id = ?`) pada seluruh endpoint manipulasi data peternak.
-- **Validasi Unggahan Berkas**: Pemeriksaan ekstensi whitelist (`jpg`, `jpeg`, `png`, `webp`), pengacakan nama file via `bin2hex(random_bytes(4))`, dan pembersihan berkas fisik saat data dihapus.
-- **Standar PSR-12**: Seluruh berkas PHP diformat dan tervalidasi menggunakan standar pengodean PSR-12.
+</div>
 
 ---
 
-## 🛠️ Persyaratan Sistem
+## 📖 Tentang Proyek
 
-- **PHP**: Versi 8.0 atau lebih baru (ekstensi `mysqli`, `fileinfo`, `json` aktif).
-- **Web Server**: Apache / Nginx (XAMPP, Laragon, atau native).
-- **Database**: MySQL 5.7+ / MariaDB 10.4+.
-- **Web Browser**: Chrome, Firefox, Edge, atau Safari modern.
+**TernakApp (SI-PHT)** adalah platform web inovatif yang dirancang untuk mendigitalkan ekosistem perdagangan hewan ternak di tingkat pedesaan (khususnya wilayah **Kecamatan Kemalang, Kabupaten Klaten**). 
+
+Platform ini menyelesaikan dua masalah utama:
+1. **Bagi Pembeli / Konsumen**: Memberikan kemudahan mencari hewan ternak (sapi, kambing, domba, unggas) dengan data transparan (harga, bobot, umur, ras, lokasi GPS peternakan) serta komunikasi langsung via WhatsApp tanpa makelar.
+2. **Bagi Peternak Lokal**: Membantu memasarkan hewan secara luas, mengelola katalog penjualan, serta mencatat arus kas pengeluaran operasional & pakan untuk menghitung margin keuntungan bersih (*profit/loss*).
 
 ---
 
-## 🚀 Panduan Instalasi
+## ✨ Fitur Unggulan
 
-### 1. Clone Repositori
-Tempatkan folder proyek ke dalam direktori web server Anda (`htdocs` pada XAMPP atau `www` pada Laragon):
+<table width="100%">
+  <tr>
+    <td width="33%" valign="top">
+      <h3>🛒 Marketplace Publik</h3>
+      <ul>
+        <li><b>Katalog Responsif:</b> Tampilan kartu hewan modern dengan status ketersediaan.</li>
+        <li><b>Multi-Filter Canggih:</b> Filter dinamis berdasarkan Dusun, Jenis Hewan, Ras, dan Nama Peternak.</li>
+        <li><b>Detail & Galeri Interaktif:</b> Multi-preview foto resolusi tinggi.</li>
+        <li><b>Integrasi Maps & WhatsApp:</b> Direct chat WA dengan teks otomatis & navigasi Google Maps.</li>
+      </ul>
+    </td>
+    <td width="33%" valign="top">
+      <h3>👨‍🌾 Dashboard Peternak</h3>
+      <ul>
+        <li><b>Manajemen Hewan:</b> CRUD postingan hewan ternak.</li>
+        <li><b>Multi-Upload Foto:</b> Unggah 4 hingga 6 foto sekaligus dengan validasi instan.</li>
+        <li><b>Tracking GPS:</b> Ambil titik koordinat lokasi kandang otomatis via sensor browser.</li>
+        <li><b>Manajemen Biaya & Profit:</b> Kalkulasi otomatis <code>Harga Jual - Biaya Operasional</code>.</li>
+        <li><b>Statistik & Grafik:</b> Visualisasi tren performa bulanan via Chart.js.</li>
+      </ul>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🛡️ Dashboard Admin</h3>
+      <ul>
+        <li><b>Kelola Pengguna:</b> Monitoring, aktivasi, nonaktifkan, atau hapus akun pengguna.</li>
+        <li><b>Monitoring Ternak:</b> Pengawasan seluruh hewan dari semua peternak.</li>
+        <li><b>Sistem Pengarsipan:</b> Arsipkan hewan yang telah terjual untuk menjaga kerapihan data aktif.</li>
+        <li><b>Proteksi Administrator:</b> Fitur keamanan anti *self-deletion* akun admin yang sedang login.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 🔄 Alur Kerja Sistem
+
+```text
+  [ Pembeli / Konsumen ]
+           │
+           ▼
+  [ Halaman Marketplace ] ──(Filter Dusun / Ras / Harga)──► [ Detail Hewan ]
+                                                                   │
+                                     ┌─────────────────────────────┴──────────────────────────────┐
+                                     ▼                                                            ▼
+                           [ Buka Google Maps ]                                       [ Chat WhatsApp Peternak ]
+                        (Navigasi Menuju Kandang)                                        (Negosiasi & Transaksi)
+
+
+  [ Peternak ] ────► [ Dashboard Peternak ] ────► [ Kelola Hewan & Foto ] ────► [ Catat Pengeluaran & Profit ]
+  [ Admin ]    ────► [ Dashboard Admin ]    ────► [ Kelola User & Ternak ] ────► [ Arsip Ternak Terjual ]
+```
+
+---
+
+## 🔒 Standar Keamanan & Kualitas Kode
+
+- 🛡️ **Bebas SQL Injection**: 100% kueri database yang melibatkan input pengguna menggunakan **Prepared Statements** (`mysqli_prepare`).
+- 🔐 **Proteksi IDOR (Insecure Direct Object References)**: Validasi ketat kepemilikan data (`WHERE id = ? AND user_id = ?`) di setiap aksi edit/hapus peternak.
+- 📁 **Keamanan Unggah Berkas**: Whitelist tipe MIME & ekstensi (`jpg`, `jpeg`, `png`, `webp`), pengacakan nama file kriptografis (`bin2hex(random_bytes(4))`), serta penghapusan file fisik saat record dihapus (*cascade unlink*).
+- 📐 **Standar Pengodean PSR-12**: Format kode rapi dan terstandardisasi secara konsisten.
+
+---
+
+## 🚀 Panduan Instalasi & Menjalankan
+
+### 📋 Prasyarat
+- **PHP** >= 8.0 *(dengan ekstensi `mysqli`, `fileinfo`, `json`)*
+- **MySQL / MariaDB**
+- **Web Server** *(XAMPP / Laragon / Native Apache)*
+
+---
+
+### 1️⃣ Clone Repositori
+Salin repositori ini ke folder root web server Anda (`htdocs` pada XAMPP atau `www` pada Laragon):
 ```bash
 git clone https://github.com/riff122/SI-PHT.git
 ```
 
-### 2. Import Basis Data
-1. Buka **phpMyAdmin** (`http://localhost/phpmyadmin`) atau MySQL CLI.
-2. Buat database baru dengan nama `ternakapp`.
-3. Import file `database.sql` yang berada di direktori utama proyek.
+### 2️⃣ Siapkan Basis Data
+1. Buka **phpMyAdmin** (`http://localhost/phpmyadmin`) atau terminal MySQL Anda.
+2. Buat database baru bernama `ternakapp`:
+   ```sql
+   CREATE DATABASE ternakapp;
+   ```
+3. Import berkas [`database.sql`](./database.sql) ke dalam database `ternakapp`.
 
-### 3. Konfigurasi Koneksi Database
-Sesuaikan kredensial basis data pada berkas `config/koneksi.php`:
+### 3️⃣ Konfigurasi Koneksi
+Periksa konfigurasi koneksi pada [`config/koneksi.php`](./config/koneksi.php):
 ```php
 $host = "localhost";
 $user = "root";
@@ -66,46 +136,70 @@ $pass = "";
 $db   = "ternakapp";
 ```
 
-### 4. Jalankan Aplikasi
-Buka peramban (browser) dan akses:
-```
+### 4️⃣ Akses Aplikasi
+Buka peramban favorit Anda dan kunjungi:
+```text
 http://localhost/SI-PHT/home.php
 ```
 
 ---
 
-## 📂 Struktur Direktori
+## 🔑 Akun Demo Default
 
-```text
+Tersedia akun bawaan yang siap langsung digunakan untuk pengujian:
+
+| Role | Email | Password | Hak Akses |
+| :--- | :--- | :--- | :--- |
+| 🛡️ **Administrator** | `admin@ternakapp.id` | `admin123` | Kelola seluruh pengguna, postingan, arsip |
+| 👨‍🌾 **Peternak** | `peternak@ternakapp.id` | `peternak123` | Kelola hewan, input pengeluaran, pantau profit |
+
+---
+
+## 📁 Struktur Direktori
+
+```bash
 SI-PHT/
-├── auth/                 # Modul autentikasi (login & register)
+├── 📁 auth/                 # Modul autentikasi login & registrasi
 │   ├── login.php
 │   └── register.php
-├── config/               # Konfigurasi aplikasi & database
+├── 📁 config/               # Konfigurasi koneksi MySQL
 │   └── koneksi.php
-├── dashboard/            # Halaman dashboard Admin & Peternak
-│   ├── admin.php         # Dashboard utama Administrator
-│   ├── user.php          # Dashboard utama Peternak
-│   ├── data_hewan/       # Modul kelola hewan untuk Admin
-│   ├── data_user/        # Modul kelola pengguna untuk Admin
-│   ├── hewan/            # Modul CRUD hewan untuk Peternak
-│   ├── pengeluaran/      # Modul pencatatan pengeluaran
-│   ├── keuntungan.php    # Laporan profit/loss peternak
-│   ├── lihat_profil.php  # Pratinjau profil peternak
-│   ├── logout.php        # Proses logout
-│   └── profil.php        # Pengaturan profil pengguna
-├── images/               # Direktori aset gambar statis & upload
-│   ├── hewan/
-│   └── profil/
-├── database.sql          # Skema database & tabel relasi
-├── detail.php            # Halaman rincian hewan publik
-├── home.php              # Halaman beranda & marketplace utama
-├── reset.php             # Redirect reset sesi
-└── style.css             # Desain antarmuka & stylesheet utama
+├── 📁 dashboard/            # Modul panel kontrol (Admin & Peternak)
+│   ├── admin.php           # Dashboard utama Administrator
+│   ├── user.php            # Dashboard utama Peternak
+│   ├── 📁 data_hewan/      # Manajemen hewan untuk Administrator
+│   ├── 📁 data_user/       # Manajemen akun pengguna untuk Administrator
+│   ├── 📁 hewan/           # CRUD data ternak untuk Peternak
+│   ├── 📁 pengeluaran/     # Pencatatan operasional & pakan ternak
+│   ├── keuntungan.php      # Laporan margin profit / loss
+│   ├── lihat_profil.php    # Pratinjau profil publik peternak
+│   ├── logout.php          # Proses pengakhiran sesi
+│   └── profil.php          # Manajemen profil akun
+├── 📁 images/               # Media statis & penyimpanan unggahan foto
+│   ├── 📁 hewan/
+│   └── 📁 profil/
+├── 📄 database.sql          # Skema database relasional & initial seed data
+├── 📄 detail.php            # Halaman detail rincian hewan publik
+├── 📄 home.php              # Halaman beranda & etalase marketplace
+├── 📄 reset.php             # Skrip utilitas redirect sesi
+├── 📄 style.css             # Stylesheet styling kustom & glassmorphism
+└── 📄 .gitignore            # Konfigurasi filter berkas Git
 ```
 
 ---
 
-## 📄 Lisensi
+## 🛠️ Teknologi yang Digunakan
 
-Proyek ini dikembangkan untuk kebutuhan digitalisasi peternakan lokal Klaten &copy; TernakApp. Seluruh hak cipta dilindungi.
+- **Backend**: Native PHP 8.3 (Structured & Secure)
+- **Database**: MySQL / MariaDB (Prepared Statements)
+- **Frontend**: HTML5, Vanilla JavaScript, CSS3 (Modern Glassmorphism Design)
+- **Framework UI**: Bootstrap 5.3 & Bootstrap Icons
+- **Visualisasi Data**: Chart.js
+- **Integrasi API**: Google Maps Geolocation Embed API & WhatsApp URL Scheme
+
+---
+
+<div align="center">
+  <p>Dikembangkan dengan ❤️ untuk mendukung digitalisasi peternak lokal di Indonesia.</p>
+  <p>&copy; 2026 <b>TernakApp</b>. Seluruh Hak Cipta Dilindungi.</p>
+</div>
