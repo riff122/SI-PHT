@@ -81,6 +81,45 @@ if (isset($_POST['simpan'])) {
     }
 }
 
+// Proses Ganti Password
+if (isset($_POST['ubah_password'])) {
+    $passLama = $_POST['pass_lama'] ?? '';
+    $passBaru = $_POST['pass_baru'] ?? '';
+    $passKonf = $_POST['pass_konfirm'] ?? '';
+
+    if (empty($passLama) || empty($passBaru) || empty($passKonf)) {
+        echo "<script>alert('Seluruh kolom kata sandi wajib diisi!'); history.back();</script>";
+        exit;
+    }
+
+    if (!password_verify($passLama, $user['password'])) {
+        echo "<script>alert('Kata sandi saat ini (lama) salah!'); history.back();</script>";
+        exit;
+    }
+
+    if (strlen($passBaru) < 6) {
+        echo "<script>alert('Kata sandi baru minimal terdiri dari 6 karakter!'); history.back();</script>";
+        exit;
+    }
+
+    if ($passBaru !== $passKonf) {
+        echo "<script>alert('Konfirmasi kata sandi baru tidak cocok!'); history.back();</script>";
+        exit;
+    }
+
+    $hashBaru = password_hash($passBaru, PASSWORD_DEFAULT);
+    $stmtPass = mysqli_prepare($conn, "UPDATE users SET password = ? WHERE id = ?");
+    mysqli_stmt_bind_param($stmtPass, "si", $hashBaru, $user_id);
+
+    if (mysqli_stmt_execute($stmtPass)) {
+        echo "<script>alert('Kata sandi berhasil diperbarui!'); window.location='profil.php';</script>";
+        exit;
+    } else {
+        echo "<script>alert('Gagal mengubah kata sandi: " . addslashes(mysqli_error($conn)) . "'); history.back();</script>";
+        exit;
+    }
+}
+
 // Foto profil untuk ditampilkan
 $folderFoto = '../images/profil/';
 if (!empty($user['foto']) && file_exists($folderFoto . $user['foto'])) {
@@ -99,6 +138,7 @@ if (!empty($user['foto']) && file_exists($folderFoto . $user['foto'])) {
     <title>Profil Saya - <?= htmlspecialchars($user['nama']); ?></title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../style.css">
 </head>
 
@@ -186,6 +226,73 @@ if (!empty($user['foto']) && file_exists($folderFoto . $user['foto'])) {
 
         </div>
 
+        <!-- Card Ganti Kata Sandi -->
+        <div class="card border-0 shadow-sm p-4 mt-4">
+
+            <h4 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                <i class="bi bi-shield-lock text-success"></i> Ubah Kata Sandi
+            </h4>
+
+            <form method="POST" id="formGantiPass">
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Kata Sandi Saat Ini</label>
+                    <div class="input-group">
+                        <input type="password"
+                            name="pass_lama"
+                            id="passLama"
+                            class="form-control"
+                            placeholder="Masukkan kata sandi saat ini"
+                            required>
+                        <button class="btn btn-outline-secondary toggle-pass-btn" type="button" data-target="passLama">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Kata Sandi Baru (Min. 6 Karakter)</label>
+                    <div class="input-group">
+                        <input type="password"
+                            name="pass_baru"
+                            id="passBaru"
+                            class="form-control"
+                            placeholder="Buat kata sandi baru"
+                            minlength="6"
+                            required>
+                        <button class="btn btn-outline-secondary toggle-pass-btn" type="button" data-target="passBaru">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Konfirmasi Kata Sandi Baru</label>
+                    <div class="input-group">
+                        <input type="password"
+                            name="pass_konfirm"
+                            id="passKonfirm"
+                            class="form-control"
+                            placeholder="Ulangi kata sandi baru"
+                            minlength="6"
+                            required>
+                        <button class="btn btn-outline-secondary toggle-pass-btn" type="button" data-target="passKonfirm">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <small id="profilPassMatchText" class="text-muted" style="font-size: 11px;"></small>
+                </div>
+
+                <button type="submit"
+                    name="ubah_password"
+                    class="btn btn-outline-success w-100 py-2 fw-semibold">
+                    Perbarui Kata Sandi
+                </button>
+
+            </form>
+
+        </div>
+
     </div>
 
     <!-- Modal Zoom Foto Profil -->
@@ -203,7 +310,61 @@ if (!empty($user['foto']) && file_exists($folderFoto . $user['foto'])) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle Show/Hide Password di halaman profil
+        document.querySelectorAll('.toggle-pass-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const targetInput = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+                if (targetInput) {
+                    if (targetInput.type === 'password') {
+                        targetInput.type = 'text';
+                        icon.classList.remove('bi-eye');
+                        icon.classList.add('bi-eye-slash');
+                    } else {
+                        targetInput.type = 'password';
+                        icon.classList.remove('bi-eye-slash');
+                        icon.classList.add('bi-eye');
+                    }
+                }
+            });
+        });
 
+        // Validasi kecocokan kata sandi baru
+        const passBaru = document.getElementById('passBaru');
+        const passKonfirm = document.getElementById('passKonfirm');
+        const profilPassMatchText = document.getElementById('profilPassMatchText');
+        const formGantiPass = document.getElementById('formGantiPass');
+
+        function checkProfilPass() {
+            if (!passBaru || !passKonfirm) return;
+            if (!passKonfirm.value) {
+                profilPassMatchText.textContent = '';
+                return;
+            }
+            if (passBaru.value === passKonfirm.value) {
+                profilPassMatchText.textContent = '✓ Kata sandi baru cocok';
+                profilPassMatchText.className = 'text-success fw-semibold';
+            } else {
+                profilPassMatchText.textContent = '✗ Konfirmasi kata sandi tidak cocok';
+                profilPassMatchText.className = 'text-danger fw-semibold';
+            }
+        }
+
+        if (passBaru) passBaru.addEventListener('input', checkProfilPass);
+        if (passKonfirm) passKonfirm.addEventListener('input', checkProfilPass);
+
+        if (formGantiPass) {
+            formGantiPass.addEventListener('submit', function(e) {
+                if (passBaru.value !== passKonfirm.value) {
+                    e.preventDefault();
+                    alert('Konfirmasi kata sandi baru tidak cocok!');
+                    passKonfirm.focus();
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>

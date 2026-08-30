@@ -15,10 +15,28 @@ if (isset($_POST['register'])) {
 
     $alamat = $desa . ", " . $kelurahan . ", " . $kecamatan . ", " . $kabupaten;
 
-    $rawPassword = $_POST['password'] ?? '';
+    $rawPassword     = $_POST['password'] ?? '';
+    $confirmPassword = $_POST['confirm_password'] ?? '';
+
     if (empty($nama) || empty($email) || empty($wa) || empty($rawPassword)) {
         echo "<script>
             alert('Semua kolom wajib diisi!');
+            window.location='../home.php';
+        </script>";
+        exit;
+    }
+
+    if (strlen($rawPassword) < 6) {
+        echo "<script>
+            alert('Password minimal terdiri dari 6 karakter!');
+            window.location='../home.php';
+        </script>";
+        exit;
+    }
+
+    if (!empty($confirmPassword) && $rawPassword !== $confirmPassword) {
+        echo "<script>
+            alert('Konfirmasi password tidak cocok!');
             window.location='../home.php';
         </script>";
         exit;

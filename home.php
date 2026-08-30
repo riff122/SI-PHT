@@ -834,16 +834,21 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
                                 <form action="auth/login.php" method="POST">
 
                                     <div class="mb-3">
-                                        <label>Email</label>
-                                        <input type="email" name="email" class="form-control" required>
+                                        <label class="form-label fw-semibold">Email</label>
+                                        <input type="email" name="email" class="form-control" placeholder="nama@email.com" required>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label>Password</label>
-                                        <input type="password" name="password" class="form-control" required>
+                                        <label class="form-label fw-semibold">Password</label>
+                                        <div class="input-group">
+                                            <input type="password" name="password" id="loginPassword" class="form-control" placeholder="Masukkan password" required>
+                                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="loginPassword" title="Lihat/Sembunyikan password">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
                                     </div>
 
-                                    <button type="submit" name="login" class="btn btn-success w-100 py-3">
+                                    <button type="submit" name="login" class="btn btn-success w-100 py-3 fw-semibold">
                                         Masuk Dashboard
                                     </button>
 
@@ -854,54 +859,75 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
                             <!-- REGISTER -->
                             <div class="tab-pane fade" id="registerTab">
 
-                                <form action="auth/register.php" method="POST">
+                                <form action="auth/register.php" method="POST" id="registerForm">
 
                                     <div class="mb-3">
-                                        <label>Nama</label>
-                                        <input type="text" name="nama" class="form-control" required>
+                                        <label class="form-label fw-semibold">Nama Lengkap</label>
+                                        <input type="text" name="nama" class="form-control" placeholder="Nama peternak" required>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label>Email</label>
-                                        <input type="email" name="email" class="form-control" required>
+                                        <label class="form-label fw-semibold">Email</label>
+                                        <input type="email" name="email" class="form-control" placeholder="email@contoh.com" required>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label>No WhatsApp</label>
-                                        <input type="text" name="wa" class="form-control" required>
+                                        <label class="form-label fw-semibold">No WhatsApp</label>
+                                        <input type="text" name="wa" class="form-control" placeholder="08123456789" required>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label>Dusun</label>
+                                        <label class="form-label fw-semibold">Dusun</label>
                                         <input type="text" name="dusun" class="form-control"
                                             placeholder="Contoh: Tasikmadu" required>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label>Kelurahan</label>
+                                        <label class="form-label fw-semibold">Kelurahan</label>
                                         <input type="text" name="kelurahan" class="form-control"
                                             placeholder="Contoh: Keputran" required>
                                     </div>
 
-                                    <div class="mb-3">
-                                        <label>Kecamatan</label>
-                                        <input type="text" name="kecamatan" class="form-control"
-                                            value="Kemalang" readonly>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold">Kecamatan</label>
+                                            <input type="text" name="kecamatan" class="form-control bg-light"
+                                                value="Kemalang" readonly>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold">Kabupaten</label>
+                                            <input type="text" name="kabupaten" class="form-control bg-light"
+                                                value="Klaten" readonly>
+                                        </div>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label>Kabupaten</label>
-                                        <input type="text" name="kabupaten" class="form-control"
-                                            value="Klaten" readonly>
+                                        <label class="form-label fw-semibold">Password (Min. 6 Karakter)</label>
+                                        <div class="input-group">
+                                            <input type="password" name="password" id="regPassword" class="form-control" placeholder="Buat kata sandi" required minlength="6">
+                                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="regPassword" title="Lihat/Sembunyikan password">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div class="progress mt-2" style="height: 4px;">
+                                            <div id="passwordStrengthBar" class="progress-bar bg-danger" role="progressbar" style="width: 0%;"></div>
+                                        </div>
+                                        <small id="passwordStrengthText" class="text-muted" style="font-size: 11px;">Kekuatan password: belum diisi</small>
                                     </div>
 
-                                    <div class="mb-3">
-                                        <label>Password</label>
-                                        <input type="password" name="password" class="form-control" required>
+                                    <div class="mb-4">
+                                        <label class="form-label fw-semibold">Konfirmasi Password</label>
+                                        <div class="input-group">
+                                            <input type="password" name="confirm_password" id="regConfirmPassword" class="form-control" placeholder="Ulangi kata sandi" required minlength="6">
+                                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="regConfirmPassword" title="Lihat/Sembunyikan password">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        <small id="passwordMatchText" class="text-muted" style="font-size: 11px;"></small>
                                     </div>
 
-                                    <button type="submit" name="register" class="btn btn-success w-100 py-3">
-                                        Daftar
+                                    <button type="submit" name="register" id="btnRegisterSubmit" class="btn btn-success w-100 py-3 fw-semibold">
+                                        Daftar Peternak
                                     </button>
 
                                 </form>
@@ -1158,6 +1184,107 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
                 pwaInstallNav.style.display = 'none';
             }
         });
+
+        // ==========================================
+        // Toggle Show / Hide Password
+        // ==========================================
+        document.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const targetInput = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+                if (targetInput) {
+                    if (targetInput.type === 'password') {
+                        targetInput.type = 'text';
+                        icon.classList.remove('bi-eye');
+                        icon.classList.add('bi-eye-slash');
+                    } else {
+                        targetInput.type = 'password';
+                        icon.classList.remove('bi-eye-slash');
+                        icon.classList.add('bi-eye');
+                    }
+                }
+            });
+        });
+
+        // ==========================================
+        // Password Strength & Match Validator
+        // ==========================================
+        const regPassword = document.getElementById('regPassword');
+        const regConfirmPassword = document.getElementById('regConfirmPassword');
+        const passwordStrengthBar = document.getElementById('passwordStrengthBar');
+        const passwordStrengthText = document.getElementById('passwordStrengthText');
+        const passwordMatchText = document.getElementById('passwordMatchText');
+        const registerForm = document.getElementById('registerForm');
+
+        if (regPassword) {
+            regPassword.addEventListener('input', function() {
+                const val = this.value;
+                let score = 0;
+                if (val.length >= 6) score += 25;
+                if (val.length >= 10) score += 25;
+                if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score += 25;
+                if (/[0-9]/.test(val) || /[^A-Za-z0-9]/.test(val)) score += 25;
+
+                passwordStrengthBar.style.width = score + '%';
+                if (score === 0) {
+                    passwordStrengthBar.className = 'progress-bar bg-danger';
+                    passwordStrengthText.textContent = 'Kekuatan password: belum diisi';
+                    passwordStrengthText.className = 'text-muted';
+                } else if (score <= 25) {
+                    passwordStrengthBar.className = 'progress-bar bg-danger';
+                    passwordStrengthText.textContent = 'Kekuatan: Sangat Lemah (min. 6 karakter)';
+                    passwordStrengthText.className = 'text-danger';
+                } else if (score <= 50) {
+                    passwordStrengthBar.className = 'progress-bar bg-warning';
+                    passwordStrengthText.textContent = 'Kekuatan: Cukup (tambahkan kombinasi huruf & angka)';
+                    passwordStrengthText.className = 'text-warning';
+                } else if (score <= 75) {
+                    passwordStrengthBar.className = 'progress-bar bg-info';
+                    passwordStrengthText.textContent = 'Kekuatan: Baik';
+                    passwordStrengthText.className = 'text-info';
+                } else {
+                    passwordStrengthBar.className = 'progress-bar bg-success';
+                    passwordStrengthText.textContent = 'Kekuatan: Sangat Kuat & Aman';
+                    passwordStrengthText.className = 'text-success';
+                }
+
+                checkPasswordMatch();
+            });
+        }
+
+        function checkPasswordMatch() {
+            if (!regConfirmPassword || !regPassword) return;
+            const passVal = regPassword.value;
+            const confirmVal = regConfirmPassword.value;
+
+            if (!confirmVal) {
+                passwordMatchText.textContent = '';
+                return;
+            }
+
+            if (passVal === confirmVal) {
+                passwordMatchText.textContent = '✓ Password cocok';
+                passwordMatchText.className = 'text-success fw-semibold';
+            } else {
+                passwordMatchText.textContent = '✗ Password belum cocok';
+                passwordMatchText.className = 'text-danger fw-semibold';
+            }
+        }
+
+        if (regConfirmPassword) {
+            regConfirmPassword.addEventListener('input', checkPasswordMatch);
+        }
+
+        if (registerForm) {
+            registerForm.addEventListener('submit', function(e) {
+                if (regPassword.value !== regConfirmPassword.value) {
+                    e.preventDefault();
+                    alert('Konfirmasi password tidak cocok dengan password yang dimasukkan!');
+                    regConfirmPassword.focus();
+                }
+            });
+        }
     </script>
 
 </body>
