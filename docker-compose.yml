@@ -1,0 +1,83 @@
+services:
+  # ==========================================
+  # Service 1: Aplikasi Web (Apache + PHP 8.3)
+  # ==========================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ternakapp_web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASS: rootpassword
+      DB_NAME: ternakapp
+    volumes:
+      - .:/var/www/html
+      - app_images:/var/www/html/images
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ternakapp_network
+
+  # ==========================================
+  # Service 2: Basis Data (MariaDB 10.11)
+  # ==========================================
+  db:
+    image: mariadb:10.11
+    container_name: ternakapp_db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ternakapp
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database.sql:/docker-entrypoint-initdb.d/01-database.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - ternakapp_network
+
+  # ==========================================
+  # Service 3: phpMyAdmin GUI Database
+  # ==========================================
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: ternakapp_pma
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+      UPLOAD_LIMIT: 64M
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ternakapp_network
+
+# ==========================================
+# Persistent Volumes & Networks
+# ==========================================
+volumes:
+  db_data:
+    name: ternakapp_db_data
+  app_images:
+    name: ternakapp_app_images
+
+networks:
+  ternakapp_network:
+    name: ternakapp_net
+    driver: bridge

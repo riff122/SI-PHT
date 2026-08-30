@@ -1,0 +1,10 @@
+.git
+.gitignore
+.dockerignore
+.php-cs-fixer.cache
+*.phar
+.vscode
+.idea
+Thumbs.db
+Desktop.ini
+.DS_Store

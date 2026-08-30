@@ -12,6 +12,7 @@
     <img src="https://img.shields.io/badge/MySQL-8.0%2B-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL" />
     <img src="https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white" alt="Bootstrap 5" />
     <img src="https://img.shields.io/badge/PWA-Ready-orange?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA Ready" />
+    <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Ready" />
     <img src="https://img.shields.io/badge/Code%20Style-PSR--12-brightgreen?style=for-the-badge" alt="PSR-12" />
     <img src="https://img.shields.io/badge/Security-Prepared%20Statements-blue?style=for-the-badge" alt="Security" />
   </p>
@@ -184,41 +185,40 @@ erDiagram
 
 ## 🚀 Panduan Instalasi & Menjalankan
 
-### 📋 Prasyarat
-- **PHP** >= 8.0 *(dengan ekstensi `mysqli`, `fileinfo`, `json`)*
-- **MySQL / MariaDB**
-- **Web Server** *(XAMPP / Laragon / Native Apache)*
+Anda dapat menjalankan **TernakApp** menggunakan **Docker** (Sangat Direkomendasikan) atau **Secara Manual (XAMPP / Laragon)**:
+
+### 🐳 Opsi A: Menggunakan Docker Compose (Satu Perintah)
+
+1. Pastikan **Docker Desktop** atau **Docker Engine** sudah terpasang dan aktif.
+2. Clone repositori dan masuk ke direktori proyek:
+   ```bash
+   git clone https://github.com/riff122/SI-PHT.git
+   cd SI-PHT
+   ```
+3. Jalankan seluruh container (Aplikasi Web, MariaDB, dan phpMyAdmin):
+   ```bash
+   docker compose up -d
+   ```
+4. Buka peramban dan akses:
+   - **Aplikasi Web**: [`http://localhost:8080/home.php`](http://localhost:8080/home.php)
+   - **phpMyAdmin**: [`http://localhost:8081`](http://localhost:8081) *(User: `root`, Password: `rootpassword`)*
 
 ---
 
-### 1️⃣ Clone Repositori
-Salin repositori ini ke folder root web server Anda (`htdocs` pada XAMPP atau `www` pada Laragon):
-```bash
-git clone https://github.com/riff122/SI-PHT.git
-```
+### 💻 Opsi B: Instalasi Manual (XAMPP / Laragon)
 
-### 2️⃣ Siapkan Basis Data
-1. Buka **phpMyAdmin** (`http://localhost/phpmyadmin`) atau terminal MySQL Anda.
-2. Buat database baru bernama `ternakapp`:
-   ```sql
-   CREATE DATABASE ternakapp;
+1. **Clone Repositori**: Salin ke direktori web root (`htdocs` pada XAMPP atau `www` pada Laragon):
+   ```bash
+   git clone https://github.com/riff122/SI-PHT.git
    ```
-3. Import berkas [`database.sql`](./database.sql) ke dalam database `ternakapp`.
-
-### 3️⃣ Konfigurasi Koneksi
-Periksa konfigurasi koneksi pada [`config/koneksi.php`](./config/koneksi.php):
-```php
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db   = "ternakapp";
-```
-
-### 4️⃣ Akses Aplikasi
-Buka peramban favorit Anda dan kunjungi:
-```text
-http://localhost/SI-PHT/home.php
-```
+2. **Siapkan Basis Data**:
+   - Buka **phpMyAdmin** (`http://localhost/phpmyadmin`).
+   - Buat database bernama `ternakapp`.
+   - Import berkas [`database.sql`](./database.sql).
+3. **Konfigurasi Koneksi**:
+   Periksa konfigurasi pada [`config/koneksi.php`](./config/koneksi.php) (secara default sudah sesuai dengan `localhost`, `root`, password kosong).
+4. **Buka Aplikasi**:
+   Akses di peramban: [`http://localhost/SI-PHT/home.php`](http://localhost/SI-PHT/home.php)
 
 ---
 
