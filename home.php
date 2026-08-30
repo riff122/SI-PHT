@@ -54,6 +54,16 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#198754">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="TernakApp">
+    <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="images/icons/icon-192.png">
+
     <!-- style -->
     <link rel="stylesheet" href="style.css">
 
@@ -111,7 +121,12 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
                             </button>
 
                         <?php } ?>
+                    </li>
 
+                    <li class="nav-item ms-lg-2 mt-3 mt-lg-0" id="pwaInstallNav" style="display: none;">
+                        <button id="pwaInstallBtn" class="btn btn-outline-success d-flex align-items-center gap-1">
+                            <i class="bi bi-download"></i> Install App
+                        </button>
                     </li>
                 </ul>
             </div>
@@ -1268,8 +1283,54 @@ LIMIT $start, $limit
             }
 
         };
-    </script>
 
+        // Registrasi Service Worker PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js')
+                    .then(function(registration) {
+                        console.log('TernakApp Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.warn('TernakApp Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // Penanganan Tombol Install PWA (A2HS)
+        let deferredPrompt;
+        const pwaInstallNav = document.getElementById('pwaInstallNav');
+        const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (pwaInstallNav) {
+                pwaInstallNav.style.display = 'block';
+            }
+        });
+
+        if (pwaInstallBtn) {
+            pwaInstallBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        console.log('Pengguna menyetujui instalasi PWA TernakApp');
+                    }
+                    deferredPrompt = null;
+                    pwaInstallNav.style.display = 'none';
+                }
+            });
+        }
+
+        window.addEventListener('appinstalled', () => {
+            console.log('TernakApp PWA berhasil di-install');
+            if (pwaInstallNav) {
+                pwaInstallNav.style.display = 'none';
+            }
+        });
+    </script>
 
 </body>
 

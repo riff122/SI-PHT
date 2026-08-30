@@ -1112,3 +1112,26 @@ canvas{
     color:rgba(255,255,255,.65);
 
 }
+
+/* ==========================================================================
+   PWA Install Button Styling
+   ========================================================================== */
+#pwaInstallBtn {
+    background: linear-gradient(135deg, var(--padi) 0%, var(--sawah) 100%);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(46, 125, 79, 0.25);
+}
+
+#pwaInstallBtn:hover {
+    background: linear-gradient(135deg, var(--padi-light) 0%, var(--padi) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(46, 125, 79, 0.35);
+    color: #ffffff;
+}
+

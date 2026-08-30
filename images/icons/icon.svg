@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#198754;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f5132;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  
+  <!-- Background Rounded Squircle -->
+  <rect width="512" height="512" rx="115" fill="url(#grad)" />
+  
+  <!-- Decorative Ring -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="#ffffff" stroke-opacity="0.12" stroke-width="6"/>
+
+  <!-- Cow / Livestock Stylized Silhouette -->
+  <g fill="#ffffff" filter="url(#shadow)">
+    <!-- Horns -->
+    <path d="M165 185 C140 145 110 135 90 145 C95 170 120 195 155 200 Z" />
+    <path d="M347 185 C372 145 402 135 422 145 C417 170 392 195 357 200 Z" />
+
+    <!-- Ears -->
+    <path d="M150 220 C105 215 75 240 70 260 C90 270 130 265 155 240 Z" opacity="0.95" />
+    <path d="M362 220 C407 215 437 240 442 260 C422 270 382 265 357 240 Z" opacity="0.95" />
+
+    <!-- Head Base -->
+    <path d="M165 185 Q256 160 347 185 C375 235 375 295 350 335 Q256 360 162 335 C137 295 137 235 165 185 Z" />
+
+    <!-- Forehead Star Mark -->
+    <path d="M256 205 L266 228 L291 228 L271 243 L278 266 L256 251 L234 266 L241 243 L221 228 L246 228 Z" fill="#20c997" opacity="0.9" />
+
+    <!-- Eyes -->
+    <circle cx="195" cy="245" r="14" fill="#0f5132" />
+    <circle cx="199" cy="241" r="5" fill="#ffffff" />
+    <circle cx="317" cy="245" r="14" fill="#0f5132" />
+    <circle cx="321" cy="241" r="5" fill="#ffffff" />
+
+    <!-- Muzzle / Nose Area -->
+    <ellipse cx="256" cy="340" rx="92" ry="55" fill="#e9f7ef" />
+    
+    <!-- Nostrils -->
+    <ellipse cx="225" cy="345" rx="14" ry="18" fill="#0f5132" transform="rotate(-15 225 345)" />
+    <ellipse cx="287" cy="345" rx="14" ry="18" fill="#0f5132" transform="rotate(15 287 345)" />
+
+    <!-- Friendly Smile -->
+    <path d="M236 372 Q256 384 276 372" fill="none" stroke="#198754" stroke-width="4" stroke-linecap="round" />
+  </g>
+</svg>

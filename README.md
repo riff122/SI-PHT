@@ -11,6 +11,7 @@
     <img src="https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP Version" />
     <img src="https://img.shields.io/badge/MySQL-8.0%2B-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL" />
     <img src="https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white" alt="Bootstrap 5" />
+    <img src="https://img.shields.io/badge/PWA-Ready-orange?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA Ready" />
     <img src="https://img.shields.io/badge/Code%20Style-PSR--12-brightgreen?style=for-the-badge" alt="PSR-12" />
     <img src="https://img.shields.io/badge/Security-Prepared%20Statements-blue?style=for-the-badge" alt="Security" />
   </p>
@@ -72,6 +73,8 @@ Platform ini menyelesaikan dua masalah utama:
     </td>
   </tr>
 </table>
+
+> 📱 **Dukungan Progressive Web App (PWA)**: TernakApp dapat di-install langsung ke layar beranda (Add to Home Screen) pada perangkat Android, iOS, maupun Desktop, memiliki ikon aplikasi khusus, waktu muat instan melalui Service Worker, serta halaman fallback offline saat tidak ada koneksi internet.
 
 ---
 
