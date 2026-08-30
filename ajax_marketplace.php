@@ -2,6 +2,21 @@
 
 include 'config/koneksi.php';
 
+if (!$conn) {
+    echo "
+    <div class='col-12 text-center py-5'>
+        <div class='card border-0 shadow-sm p-4 text-center mx-auto' style='max-width: 540px;'>
+            <i class='bi bi-database-exclamation text-warning display-4 mb-3'></i>
+            <h5 class='fw-bold'>Basis Data Belum Terhubung</h5>
+            <p class='text-muted small mb-3'>
+                Server MySQL belum aktif. Silakan jalankan <b>Laragon</b>, <b>XAMPP</b>, atau container Docker (<code>docker compose up -d</code>) untuk memuat data hewan secara lengkap.
+            </p>
+        </div>
+    </div>
+    ";
+    return;
+}
+
 $limit = 9; // 9 hewan per halaman
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 if ($page < 1) {

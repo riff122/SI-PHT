@@ -5,9 +5,10 @@ $user = getenv('DB_USER') ?: 'root';
 $pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
 $db   = getenv('DB_NAME') ?: 'ternakapp';
 
-$conn = mysqli_connect($host, $user, $pass, $db);
+mysqli_report(MYSQLI_REPORT_OFF);
+$conn = @mysqli_connect($host, $user, $pass, $db);
 
-if (!$conn) {
-    die("Koneksi database gagal: " . mysqli_connect_error());
-}
+$db_connected = ($conn !== false);
+$db_error_message = $db_connected ? '' : mysqli_connect_error();
+
 

@@ -5,34 +5,29 @@ session_start();
 include 'config/koneksi.php';
 
 
-// TOTAL HEWAN
-$totalHewan = mysqli_query($conn, "
-SELECT COUNT(*) as total 
-FROM hewan
-");
+$jumlahHewan = 0;
+$jumlahPeternak = 0;
+$jumlahDesa = 0;
 
-$jumlahHewan = mysqli_fetch_assoc($totalHewan)['total'];
+if ($conn) {
+    // TOTAL HEWAN
+    $totalHewan = mysqli_query($conn, "SELECT COUNT(*) as total FROM hewan WHERE status_arsip = 0");
+    if ($totalHewan) {
+        $jumlahHewan = (int)(mysqli_fetch_assoc($totalHewan)['total'] ?? 0);
+    }
 
+    // TOTAL PETERNAK
+    $totalPeternak = mysqli_query($conn, "SELECT COUNT(*) as total FROM users WHERE role='peternak'");
+    if ($totalPeternak) {
+        $jumlahPeternak = (int)(mysqli_fetch_assoc($totalPeternak)['total'] ?? 0);
+    }
 
-// TOTAL PETERNAK
-$totalPeternak = mysqli_query($conn, "
-SELECT COUNT(*) as total 
-FROM users
-WHERE role='peternak'
-");
-
-$jumlahPeternak = mysqli_fetch_assoc($totalPeternak)['total'];
-
-
-// TOTAL DESA
-$totalDesa = mysqli_query($conn, "
-SELECT COUNT(DISTINCT alamat) as total
-FROM users
-WHERE role='peternak'
-");
-
-$jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
-
+    // TOTAL DESA
+    $totalDesa = mysqli_query($conn, "SELECT COUNT(DISTINCT desa) as total FROM users WHERE role='peternak'");
+    if ($totalDesa) {
+        $jumlahDesa = (int)(mysqli_fetch_assoc($totalDesa)['total'] ?? 0);
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -266,24 +261,22 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
                                     <option value="">Semua Peternak</option>
 
                                     <?php
+                                    if ($conn) {
+                                        $peternak = mysqli_query($conn, "
+                                            SELECT id, nama 
+                                            FROM users
+                                            WHERE role='peternak'
+                                            ORDER BY nama ASC
+                                        ");
 
-                                    $peternak = mysqli_query($conn, "
-            SELECT id, nama 
-            FROM users
-            WHERE role='peternak'
-            ORDER BY nama ASC
-        ");
-
-                                    while ($p = mysqli_fetch_assoc($peternak)) {
-                                        $selected = (isset($_GET['peternak']) && (int)$_GET['peternak'] === (int)$p['id']) ? "selected" : "";
+                                        if ($peternak) {
+                                            while ($p = mysqli_fetch_assoc($peternak)) {
+                                                $selected = (isset($_GET['peternak']) && (int)$_GET['peternak'] === (int)$p['id']) ? "selected" : "";
+                                                echo "<option value='{$p['id']}' $selected>" . htmlspecialchars($p['nama']) . "</option>";
+                                            }
+                                        }
+                                    }
                                     ?>
-
-                                        <option value="<?= $p['id'] ?>" <?= $selected; ?>>
-                                            <?= htmlspecialchars($p['nama']); ?>
-                                        </option>
-
-                                    <?php } ?>
-
                                 </select>
 
                             </div>
