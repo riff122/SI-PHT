@@ -32,7 +32,7 @@ if (!$data) {
     exit;
 }
 
-// UPDATE DATA
+// Proses pembaruan data pengeluaran
 if (isset($_POST['update'])) {
 
     $nama = trim($_POST['nama_pengeluaran'] ?? '');

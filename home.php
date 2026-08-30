@@ -394,7 +394,7 @@ ORDER BY hewan.updated_at DESC
 LIMIT $start, $limit
 ");
 
-// JIKA TIDAK ADA DATA
+// Pesan jika tidak ada data hewan
 if (mysqli_num_rows($query) == 0) {
     echo "
     <div class='col-12 text-center'>
@@ -405,19 +405,12 @@ if (mysqli_num_rows($query) == 0) {
     ";
 }
 
-// Marketplace
+// Looping daftar hewan di marketplace
 while ($data = mysqli_fetch_assoc($query)) {
     ?>
-
-?>
-
-
-<div class="col-lg-4 col-md-6">
-
-    <div class="card animal-card h-100
-    <?php echo $data['status'] == 'Terjual' ? 'opacity-50' : ''; ?>">
-
-        <div class="position-relative">
+    <div class="col-lg-4 col-md-6">
+        <div class="card animal-card h-100 <?php echo $data['status'] == 'Terjual' ? 'opacity-50' : ''; ?>">
+            <div class="position-relative">
 
     <img src="images/hewan/<?php echo $data['foto']; ?>"
          class="card-img-top"

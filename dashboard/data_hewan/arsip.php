@@ -21,11 +21,7 @@ if ($id == '') {
     exit;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Hanya hewan TERJUAL yang boleh diarsipkan
-|--------------------------------------------------------------------------
-*/
+// Hanya hewan berstatus 'Terjual' yang boleh diarsipkan
 
 $stmt = mysqli_prepare($conn, "
     UPDATE hewan

@@ -4,7 +4,7 @@ session_start();
 
 include '../../config/koneksi.php';
 
-// cek login
+// Verifikasi sesi login
 if (!isset($_SESSION['user'])) {
     header("Location: ../../home.php");
     exit;
@@ -13,14 +13,14 @@ if (!isset($_SESSION['user'])) {
 $user_id = (int)$_SESSION['user']['id'];
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// cek apakah hewan milik user login
+// Verifikasi kepemilikan data hewan oleh peternak yang sedang login
 $stmt = mysqli_prepare($conn, "SELECT * FROM hewan WHERE id = ? AND user_id = ?");
 mysqli_stmt_bind_param($stmt, "ii", $id, $user_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $data = mysqli_fetch_assoc($result);
 
-// jika data tidak ada
+// Jika data tidak ditemukan atau bukan milik peternak yang login
 if (!$data) {
     echo "<script>
         alert('Data tidak ditemukan atau Anda tidak memiliki akses.');
