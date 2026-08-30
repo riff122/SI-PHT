@@ -78,7 +78,6 @@ if (isset($_POST['login'])) {
                 header("Location: ../dashboard/user.php");
             }
             exit;
-
         } else {
             echo "<script>
                 alert('Password salah!');
@@ -86,7 +85,6 @@ if (isset($_POST['login'])) {
             </script>";
             exit;
         }
-
     } else {
         echo "<script>
             alert('Email tidak ditemukan!');
@@ -94,7 +92,6 @@ if (isset($_POST['login'])) {
         </script>";
         exit;
     }
-
 } else {
     header("Location: ../home.php");
     exit;

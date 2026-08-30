@@ -95,7 +95,6 @@ if (isset($_POST['update'])) {
         </script>";
         exit;
     }
-
 } else {
     header("Location: index.php");
     exit;

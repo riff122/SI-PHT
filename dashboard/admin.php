@@ -35,17 +35,16 @@ if (mysqli_num_rows($status) > 0) {
 
     $q = mysqli_query($conn, "SELECT COUNT(*) AS total FROM hewan WHERE status='Tersedia'");
     $total_marketplace = mysqli_fetch_assoc($q);
-
 } else {
 
     $q = mysqli_query($conn, "SELECT COUNT(*) AS total FROM hewan");
     $total_marketplace = mysqli_fetch_assoc($q);
-
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
 
     <meta charset="UTF-8">
@@ -59,58 +58,59 @@ if (mysqli_num_rows($status) > 0) {
 
 <body class="dashboard-admin">
 
-<div class="sidebar">
+    <div class="sidebar">
 
-    <h3>🐄 TernakApp</h3>
+        <h3>🐄 TernakApp</h3>
 
-    <hr>
+        <hr>
 
-    <a href="admin.php">Dashboard</a>
-    <a href="data_user/index.php">Data User</a>
-    <a href="data_hewan/index.php">Data Hewan</a>
-    <a href="../home.php#marketplace">Marketplace</a>
-    <a href="logout.php">Logout</a>
+        <a href="admin.php">Dashboard</a>
+        <a href="data_user/index.php">Data User</a>
+        <a href="data_hewan/index.php">Data Hewan</a>
+        <a href="../home.php#marketplace">Marketplace</a>
+        <a href="logout.php">Logout</a>
 
-</div>
+    </div>
 
-<div class="content">
+    <div class="content">
 
-    <h2>Selamat Datang, <?= htmlspecialchars($_SESSION['user']['nama']); ?></h2>
-    <p class="text-muted">Dashboard Administrator</p>
+        <h2>Selamat Datang, <?= htmlspecialchars($_SESSION['user']['nama']); ?></h2>
+        <p class="text-muted">Dashboard Administrator</p>
 
-    <div class="row g-4 mt-4">
+        <div class="row g-4 mt-4">
 
-        <div class="col-md-3">
-            <div class="stats-card p-4">
-                <h5>Total User</h5>
-                <h1><?= number_format($total_user['total']); ?></h1>
+            <div class="col-md-3">
+                <div class="stats-card p-4">
+                    <h5>Total User</h5>
+                    <h1><?= number_format($total_user['total']); ?></h1>
+                </div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="stats-card p-4">
-                <h5>Total Peternak</h5>
-                <h1><?= number_format($total_peternak['total']); ?></h1>
+            <div class="col-md-3">
+                <div class="stats-card p-4">
+                    <h5>Total Peternak</h5>
+                    <h1><?= number_format($total_peternak['total']); ?></h1>
+                </div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="stats-card p-4">
-                <h5>Total Hewan</h5>
-                <h1><?= number_format($total_hewan['total']); ?></h1>
+            <div class="col-md-3">
+                <div class="stats-card p-4">
+                    <h5>Total Hewan</h5>
+                    <h1><?= number_format($total_hewan['total']); ?></h1>
+                </div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="stats-card p-4">
-                <h5>Marketplace</h5>
-                <h1><?= number_format($total_marketplace['total']); ?></h1>
+            <div class="col-md-3">
+                <div class="stats-card p-4">
+                    <h5>Marketplace</h5>
+                    <h1><?= number_format($total_marketplace['total']); ?></h1>
+                </div>
             </div>
+
         </div>
 
     </div>
 
-</div>
-
 </body>
+
 </html>

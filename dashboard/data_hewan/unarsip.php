@@ -33,9 +33,7 @@ if (mysqli_stmt_execute($stmt)) {
 
     header("Location: arsip/index.php?pesan=dipulihkan");
     exit;
-
 } else {
 
     echo "Gagal memulihkan data.";
-
 }

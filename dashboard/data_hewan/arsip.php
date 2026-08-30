@@ -36,9 +36,7 @@ if (mysqli_stmt_execute($stmt)) {
 
     header("Location: index.php?pesan=arsip");
     exit;
-
 } else {
 
     echo "Gagal mengarsipkan data.";
-
 }

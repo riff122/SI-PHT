@@ -85,19 +85,19 @@ $query = mysqli_stmt_get_result($stmt);
                         <tbody>
                             <?php
                             $no = 1;
-if (mysqli_num_rows($query) === 0) {
-    ?>
+                            if (mysqli_num_rows($query) === 0) {
+                            ?>
                                 <tr>
                                     <td colspan="6" class="text-center text-muted py-4">
                                         Belum ada data hewan ternak.
                                     </td>
                                 </tr>
                             <?php
-}
-while ($data = mysqli_fetch_assoc($query)) {
-    $total = (float)$data['total_pengeluaran'];
-    $keuntungan = (float)$data['harga'] - $total;
-    ?>
+                            }
+                            while ($data = mysqli_fetch_assoc($query)) {
+                                $total = (float)$data['total_pengeluaran'];
+                                $keuntungan = (float)$data['harga'] - $total;
+                            ?>
                                 <tr>
                                     <td class="text-center"><?= $no++; ?></td>
                                     <td class="fw-semibold">

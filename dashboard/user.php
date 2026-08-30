@@ -1541,7 +1541,7 @@ JARAK DIAGRAM KEUANGAN → REKAM JEJAK
                             ',',
                             '.'
                         );
-?>
+                        ?>
                     </h1>
 
                     <small class="text-secondary">
@@ -1567,13 +1567,13 @@ JARAK DIAGRAM KEUANGAN → REKAM JEJAK
 
                         Rp
                         <?php
-echo number_format(
-    (float)($total_pengeluaran['total'] ?: 0),
-    0,
-    ',',
-    '.'
-);
-?>
+                        echo number_format(
+                            (float)($total_pengeluaran['total'] ?: 0),
+                            0,
+                            ',',
+                            '.'
+                        );
+                        ?>
 
                     </h1>
 
@@ -1599,13 +1599,13 @@ echo number_format(
                     <h1>
 
                         <?php
-echo number_format(
-    (int)$total_terjual['total'],
-    0,
-    ',',
-    '.'
-);
-?>
+                        echo number_format(
+                            (int)$total_terjual['total'],
+                            0,
+                            ',',
+                            '.'
+                        );
+                        ?>
 
                     </h1>
 
@@ -1632,13 +1632,13 @@ echo number_format(
 
                         Rp
                         <?php
-echo number_format(
-    $total_profit,
-    0,
-    ',',
-    '.'
-);
-?>
+                        echo number_format(
+                            $total_profit,
+                            0,
+                            ',',
+                            '.'
+                        );
+                        ?>
 
                     </h1>
 
@@ -1696,29 +1696,29 @@ echo number_format(
 
                         <?php
 
-if (!empty($tahun_data)) {
+                        if (!empty($tahun_data)) {
 
-    foreach ($tahun_data as $tahun) {
+                            foreach ($tahun_data as $tahun) {
 
-        $selected =
-            ((int)$tahun === (int)$tahun_default)
-            ? 'selected'
-            : '';
+                                $selected =
+                                    ((int)$tahun === (int)$tahun_default)
+                                    ? 'selected'
+                                    : '';
 
-        echo '<option value="' .
-            $tahun .
-            '" ' .
-            $selected .
-            '>' .
-            $tahun .
-            '</option>';
-    }
-} else {
+                                echo '<option value="' .
+                                    $tahun .
+                                    '" ' .
+                                    $selected .
+                                    '>' .
+                                    $tahun .
+                                    '</option>';
+                            }
+                        } else {
 
-    echo '<option value="">Belum ada data</option>';
-}
+                            echo '<option value="">Belum ada data</option>';
+                        }
 
-?>
+                        ?>
 
                     </select>
 

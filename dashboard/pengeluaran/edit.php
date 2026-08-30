@@ -69,13 +69,13 @@ if (isset($_POST['update'])) {
         </script>";
         exit;
     }
-
 }
 
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
 
     <meta charset="UTF-8">
@@ -86,98 +86,100 @@ if (isset($_POST['update'])) {
     <link rel="stylesheet" href="../../style.css">
 
 </head>
+
 <body>
 
-<div class="container py-5" style="max-width: 700px;">
+    <div class="container py-5" style="max-width: 700px;">
 
-    <div class="card border-0 shadow-sm p-4">
+        <div class="card border-0 shadow-sm p-4">
 
-        <h2 class="mb-4 fw-bold">
-            Edit Pengeluaran
-        </h2>
+            <h2 class="mb-4 fw-bold">
+                Edit Pengeluaran
+            </h2>
 
-        <p class="text-muted mb-4">
-            Hewan Terkait: <strong class="text-success"><?= htmlspecialchars($data['nama_hewan']); ?></strong>
-        </p>
+            <p class="text-muted mb-4">
+                Hewan Terkait: <strong class="text-success"><?= htmlspecialchars($data['nama_hewan']); ?></strong>
+            </p>
 
-        <form method="POST">
+            <form method="POST">
 
-            <!-- Nama Pengeluaran -->
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Nama Pengeluaran</label>
-                <input type="text"
-                       name="nama_pengeluaran"
-                       class="form-control"
-                       value="<?= htmlspecialchars($data['nama_pengeluaran']); ?>"
-                       required>
-            </div>
+                <!-- Nama Pengeluaran -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nama Pengeluaran</label>
+                    <input type="text"
+                        name="nama_pengeluaran"
+                        class="form-control"
+                        value="<?= htmlspecialchars($data['nama_pengeluaran']); ?>"
+                        required>
+                </div>
 
-            <!-- Nominal -->
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Nominal (Rp)</label>
-                <input type="text"
-                       name="nominal"
-                       id="nominal"
-                       class="form-control"
-                       value="<?= number_format($data['nominal'], 0, ',', '.'); ?>"
-                       inputmode="numeric"
-                       required>
-            </div>
+                <!-- Nominal -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nominal (Rp)</label>
+                    <input type="text"
+                        name="nominal"
+                        id="nominal"
+                        class="form-control"
+                        value="<?= number_format($data['nominal'], 0, ',', '.'); ?>"
+                        inputmode="numeric"
+                        required>
+                </div>
 
-            <!-- Tanggal -->
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Tanggal</label>
-                <input type="date"
-                       name="tanggal"
-                       class="form-control"
-                       value="<?= htmlspecialchars($data['tanggal']); ?>"
-                       required>
-            </div>
+                <!-- Tanggal -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Tanggal</label>
+                    <input type="date"
+                        name="tanggal"
+                        class="form-control"
+                        value="<?= htmlspecialchars($data['tanggal']); ?>"
+                        required>
+                </div>
 
-            <!-- Keterangan -->
-            <div class="mb-4">
-                <label class="form-label fw-semibold">Keterangan</label>
-                <textarea name="keterangan"
-                          class="form-control"
-                          rows="4"
-                          required><?= htmlspecialchars($data['keterangan']); ?></textarea>
-            </div>
+                <!-- Keterangan -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Keterangan</label>
+                    <textarea name="keterangan"
+                        class="form-control"
+                        rows="4"
+                        required><?= htmlspecialchars($data['keterangan']); ?></textarea>
+                </div>
 
-            <!-- Tombol -->
-            <div class="d-flex gap-2">
-                <button type="submit"
+                <!-- Tombol -->
+                <div class="d-flex gap-2">
+                    <button type="submit"
                         name="update"
                         class="btn btn-success px-4">
-                    Update Pengeluaran
-                </button>
+                        Update Pengeluaran
+                    </button>
 
-                <a href="index.php"
-                   class="btn btn-secondary px-4">
-                    Kembali
-                </a>
-            </div>
+                    <a href="index.php"
+                        class="btn btn-secondary px-4">
+                        Kembali
+                    </a>
+                </div>
 
-        </form>
+            </form>
+
+        </div>
 
     </div>
 
-</div>
+    <script>
+        const nominalInput = document.getElementById('nominal');
 
-<script>
-const nominalInput = document.getElementById('nominal');
+        nominalInput.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            if (value) {
+                value = Number(value).toLocaleString('id-ID');
+            }
+            this.value = value;
+        });
 
-nominalInput.addEventListener('input', function() {
-    let value = this.value.replace(/\D/g, '');
-    if(value){
-        value = Number(value).toLocaleString('id-ID');
-    }
-    this.value = value;
-});
-
-document.querySelector('form').addEventListener('submit', function() {
-    nominalInput.value = nominalInput.value.replace(/\./g, '').replace(/,/g, '');
-});
-</script>
+        document.querySelector('form').addEventListener('submit', function() {
+            nominalInput.value = nominalInput.value.replace(/\./g, '').replace(/,/g, '');
+        });
+    </script>
 
 </body>
+
 </html>

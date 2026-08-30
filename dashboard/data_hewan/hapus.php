@@ -85,7 +85,6 @@ if (isset($_GET['id'])) {
             window.location='index.php';
         </script>";
     }
-
 } else {
     header("Location: index.php");
     exit;
