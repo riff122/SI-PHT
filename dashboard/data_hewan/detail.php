@@ -2,35 +2,39 @@
 session_start();
 include '../../config/koneksi.php';
 
-if(!isset($_SESSION['user'])){
+if (!isset($_SESSION['user'])) {
     header("Location: ../../home.php");
     exit;
 }
 
-if($_SESSION['user']['role'] != 'admin'){
+if ($_SESSION['user']['role'] != 'admin') {
     header("Location: ../../home.php");
     exit;
 }
 
-$id = (int)$_GET['id'];
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-$query = mysqli_query($conn,"
-SELECT
-    hewan.*,
-    users.nama AS peternak,
-    users.email,
-    users.wa,
-    users.alamat
-FROM hewan
-JOIN users
-ON hewan.user_id = users.id
-WHERE hewan.id='$id'
+$stmt = mysqli_prepare($conn, "
+    SELECT
+        hewan.*,
+        users.nama AS peternak,
+        users.email,
+        users.wa,
+        users.alamat
+    FROM hewan
+    JOIN users ON hewan.user_id = users.id
+    WHERE hewan.id = ?
 ");
+mysqli_stmt_bind_param($stmt, "i", $id);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$data = mysqli_fetch_assoc($result);
 
-$data = mysqli_fetch_assoc($query);
-
-if(!$data){
-    echo "Data tidak ditemukan.";
+if (!$data) {
+    echo "<script>
+        alert('Data hewan tidak ditemukan.');
+        window.location='index.php';
+    </script>";
     exit;
 }
 ?>
@@ -67,7 +71,7 @@ if(!$data){
 
 <div class="col-md-4 text-center">
 
-<?php if(!empty($data['foto'])){ ?>
+<?php if (!empty($data['foto'])) { ?>
 
 <img src="../../images/hewan/<?= htmlspecialchars($data['foto']); ?>"
 class="img-fluid rounded shadow"
@@ -103,7 +107,7 @@ style="max-height:350px;object-fit:cover;">
 
 <tr>
 <th>Harga</th>
-<td>Rp <?= number_format($data['harga'],0,',','.'); ?></td>
+<td>Rp <?= number_format($data['harga'], 0, ',', '.'); ?></td>
 </tr>
 
 <tr>

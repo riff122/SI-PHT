@@ -6,7 +6,7 @@ include 'config/koneksi.php';
 
 
 // TOTAL HEWAN
-$totalHewan = mysqli_query($conn,"
+$totalHewan = mysqli_query($conn, "
 SELECT COUNT(*) as total 
 FROM hewan
 ");
@@ -15,7 +15,7 @@ $jumlahHewan = mysqli_fetch_assoc($totalHewan)['total'];
 
 
 // TOTAL PETERNAK
-$totalPeternak = mysqli_query($conn,"
+$totalPeternak = mysqli_query($conn, "
 SELECT COUNT(*) as total 
 FROM users
 WHERE role='peternak'
@@ -25,7 +25,7 @@ $jumlahPeternak = mysqli_fetch_assoc($totalPeternak)['total'];
 
 
 // TOTAL DESA
-$totalDesa = mysqli_query($conn,"
+$totalDesa = mysqli_query($conn, "
 SELECT COUNT(DISTINCT alamat) as total
 FROM users
 WHERE role='peternak'
@@ -84,15 +84,15 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
                 <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
 
 
-    <?php if(isset($_SESSION['user'])) { ?>
+    <?php if (isset($_SESSION['user'])) { ?>
 
-    <?php if($_SESSION['user']['role'] == 'admin') { ?>
+    <?php if ($_SESSION['user']['role'] == 'admin') { ?>
         <a href="dashboard/admin.php" class="btn btn-success">
             Dashboard Admin
         </a>
     <?php } ?>
 
-    <?php if($_SESSION['user']['role'] == 'peternak') { ?>
+    <?php if ($_SESSION['user']['role'] == 'peternak') { ?>
         <a href="dashboard/user.php" class="btn btn-success">
             Dashboard Peternak
         </a>
@@ -165,7 +165,9 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
             <h2 class="section-title">Marketplace Hewan</h2>
             <p class="section-subtitle">
                 Pilih hewan Ternak terbaik langsung dari peternak terpercaya
-                <!-- SEARCH -->
+            </p>
+
+            <!-- SEARCH -->
             <div class="search-box shadow-lg">
 
 
@@ -200,11 +202,11 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
                 "Ngrendet"
             ];
 
-            foreach($desa as $d){
-                $selected = (isset($_GET['lokasi']) && $_GET['lokasi']==$d) ? "selected" : "";
-                echo "<option value='$d' $selected>$d</option>";
-            }
-            ?>
+foreach ($desa as $d) {
+    $selected = (isset($_GET['lokasi']) && $_GET['lokasi'] == $d) ? "selected" : "";
+    echo "<option value='$d' $selected>$d</option>";
+}
+?>
 
         </select>
 
@@ -245,16 +247,16 @@ $jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
 
         <?php
 
-        $peternak = mysqli_query($conn,"
+        $peternak = mysqli_query($conn, "
             SELECT id, nama 
             FROM users
             WHERE role='peternak'
             ORDER BY nama ASC
         ");
 
-        while($p=mysqli_fetch_assoc($peternak)){
+while ($p = mysqli_fetch_assoc($peternak)) {
 
-        ?>
+    ?>
 
         <option value="<?= $p['id'] ?>">
             <?= $p['nama'] ?>
@@ -304,7 +306,7 @@ $where = "WHERE hewan.status_arsip = 0";
 
 
 // FILTER DUSUN
-if(!empty($_GET['lokasi'])){
+if (!empty($_GET['lokasi'])) {
 
     $lokasi = mysqli_real_escape_string(
         $conn,
@@ -320,7 +322,7 @@ if(!empty($_GET['lokasi'])){
 
 
 // FILTER HEWAN
-if(isset($_GET['hewan']) && $_GET['hewan'] != ''){
+if (isset($_GET['hewan']) && $_GET['hewan'] != '') {
 
     $hewan = mysqli_real_escape_string(
         $conn,
@@ -336,7 +338,7 @@ if(isset($_GET['hewan']) && $_GET['hewan'] != ''){
 
 
 // FILTER RAS
-if(!empty($_GET['ras'])){
+if (!empty($_GET['ras'])) {
 
     $ras = mysqli_real_escape_string(
         $conn,
@@ -352,7 +354,7 @@ if(!empty($_GET['ras'])){
 
 
 // FILTER PETERNAK
-if(isset($_GET['peternak']) && $_GET['peternak'] != ''){
+if (isset($_GET['peternak']) && $_GET['peternak'] != '') {
 
     $peternak = mysqli_real_escape_string(
         $conn,
@@ -365,9 +367,8 @@ if(isset($_GET['peternak']) && $_GET['peternak'] != ''){
 
 }
 
-    // HITUNG TOTAL DATA
-
-$count = mysqli_query($conn,"
+// HITUNG TOTAL DATA
+$count = mysqli_query($conn, "
 SELECT COUNT(*) as total
 FROM hewan
 JOIN users
@@ -376,76 +377,37 @@ $where
 ");
 
 $totalData = mysqli_fetch_assoc($count)['total'];
-
 $totalPage = ceil($totalData / $limit);
 
-
-
 // AMBIL DATA SESUAI HALAMAN
-
-$query = mysqli_query($conn,"
+$query = mysqli_query($conn, "
 SELECT 
     hewan.*, 
     users.nama,
     users.wa,
     users.alamat
-
 FROM hewan
-
 JOIN users
 ON hewan.user_id = users.id
-
 $where
-
 ORDER BY hewan.updated_at DESC
-
-LIMIT $start,$limit
+LIMIT $start, $limit
 ");
 
 // JIKA TIDAK ADA DATA
-if(mysqli_num_rows($query) == 0){
-
+if (mysqli_num_rows($query) == 0) {
     echo "
     <div class='col-12 text-center'>
-
         <div class='alert alert-warning'>
             Hewan tidak ditemukan
         </div>
-
     </div>
     ";
 }
 
-
-// Hitung jumlah data
-$count = mysqli_query($conn,"
-SELECT COUNT(*) as total
-FROM hewan
-JOIN users
-ON hewan.user_id = users.id
-$where
-");
-
-$totalData = mysqli_fetch_assoc($count)['total'];
-
-$totalPage = ceil($totalData / $limit);
-
-
-
-// JIKA TIDAK ADA DATA
-if(mysqli_num_rows($query)==0){
-
-    echo "
-    <div class='col-12 text-center'>
-        <div class='alert alert-warning'>
-            Hewan tidak ditemukan
-        </div>
-    </div>";
-}
-
-
 // Marketplace
-while($data = mysqli_fetch_assoc($query)){
+while ($data = mysqli_fetch_assoc($query)) {
+    ?>
 
 ?>
 
@@ -461,7 +423,7 @@ while($data = mysqli_fetch_assoc($query)){
          class="card-img-top"
          style="height:250px; object-fit:cover;">
 
-    <?php if($data['status']=='Terjual'){ ?>
+    <?php if ($data['status'] == 'Terjual') { ?>
 
         <div class="sold-label">
             TERJUAL
@@ -484,9 +446,9 @@ while($data = mysqli_fetch_assoc($query)){
         </span>
 
 <span class="badge-weight">
-    <?php 
-        echo rtrim(rtrim(number_format($data['berat'], 2, ',', '.'), '0'), ',');
-        echo ' ' . $data['satuan_berat'];
+    <?php
+            echo rtrim(rtrim(number_format($data['berat'], 2, ',', '.'), '0'), ',');
+    echo ' ' . $data['satuan_berat'];
     ?>
 </span>
 
@@ -494,7 +456,7 @@ while($data = mysqli_fetch_assoc($query)){
 
         <?php
             $desa = trim(explode(',', $data['alamat'])[0]);
-        ?>
+    ?>
 
     <small class="text-muted">
         📍 <?php echo $data['alamat']; ?>
@@ -525,9 +487,9 @@ while($data = mysqli_fetch_assoc($query)){
 
         </a>
 
-        <?php if($data['status'] == 'Tersedia'){ ?>
+        <?php if ($data['status'] == 'Tersedia') { ?>
 
-    <a href="https://wa.me/62<?php echo ltrim($data['wa'],'0'); ?>?text=Saya tertarik dengan <?php echo $data['nama_hewan']; ?>"
+    <a href="https://wa.me/62<?php echo ltrim($data['wa'], '0'); ?>?text=Saya tertarik dengan <?php echo $data['nama_hewan']; ?>"
        target="_blank"
        class="btn btn-success w-50">
 
@@ -566,12 +528,12 @@ while($data = mysqli_fetch_assoc($query)){
 <ul class="pagination justify-content-center mt-5">
 
 
-<?php if($page > 1){ ?>
+<?php if ($page > 1) { ?>
 
 <li class="page-item">
 
 <a class="page-link"
-href="?page=<?= $page-1 ?>#marketplace">
+href="?page=<?= $page - 1 ?>#marketplace">
 
 Sebelumnya
 
@@ -583,9 +545,9 @@ Sebelumnya
 
 
 
-<?php for($i=1;$i<=$totalPage;$i++){ ?>
+<?php for ($i = 1;$i <= $totalPage;$i++) { ?>
 
-<li class="page-item <?= ($page==$i)?'active':'' ?>">
+<li class="page-item <?= ($page == $i) ? 'active' : '' ?>">
 
 <a class="page-link"
 href="?page=<?= $i ?>#marketplace">
@@ -601,12 +563,12 @@ href="?page=<?= $i ?>#marketplace">
 
 
 
-<?php if($page < $totalPage){ ?>
+<?php if ($page < $totalPage) { ?>
 
 <li class="page-item">
 
 <a class="page-link"
-href="?page=<?= $page+1 ?>#marketplace">
+href="?page=<?= $page + 1 ?>#marketplace">
 
 Selanjutnya
 
@@ -1174,41 +1136,39 @@ Peternak Terdaftar
         </div>
 
         <div class="mb-3">
-    <label>Dusun</label>
-    <input type="text" name="dusun" class="form-control"
-           placeholder="Contoh: Tasikmadu" required>
-</div>
+            <label>Dusun</label>
+            <input type="text" name="dusun" class="form-control"
+                   placeholder="Contoh: Tasikmadu" required>
+        </div>
 
-<div class="mb-3">
-    <label>Kelurahan</label>
-    <input type="text" name="kelurahan" class="form-control"
-           placeholder="Contoh: Keputran" required>
-</div>
+        <div class="mb-3">
+            <label>Kelurahan</label>
+            <input type="text" name="kelurahan" class="form-control"
+                   placeholder="Contoh: Keputran" required>
+        </div>
 
-<div class="mb-3">
-    <label>Kecamatan</label>
-    <input type="text" name="kecamatan" class="form-control"
-           value="Kemalang" readonly>
-</div>
+        <div class="mb-3">
+            <label>Kecamatan</label>
+            <input type="text" name="kecamatan" class="form-control"
+                   value="Kemalang" readonly>
+        </div>
 
-<div class="mb-3">
-    <label>Kabupaten</label>
-    <input type="text" name="kabupaten" class="form-control"
-           value="Klaten" readonly>
-</div>
+        <div class="mb-3">
+            <label>Kabupaten</label>
+            <input type="text" name="kabupaten" class="form-control"
+                   value="Klaten" readonly>
+        </div>
 
-<div class="mb-3">
+        <div class="mb-3">
+            <label>Password</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
 
-    <div class="mb-3">
-        <label>Password</label>
-        <input type="password" name="password" class="form-control" required>
-    </div>
+        <button type="submit" name="register" class="btn btn-success w-100 py-3">
+            Daftar
+        </button>
 
-    <button type="submit" name="register" class="btn btn-success w-100 py-3">
-        Daftar
-    </button>
-
-</form>
+    </form>
 
                         </div>
 

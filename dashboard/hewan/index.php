@@ -4,76 +4,60 @@ session_start();
 
 include __DIR__ . '/../../config/koneksi.php';
 
-if(!isset($_SESSION['user'])){
+if (!isset($_SESSION['user'])) {
     header("Location: ../../home.php");
     exit;
 }
 
-$user_id = $_SESSION['user']['id'];
+$user_id = (int)$_SESSION['user']['id'];
 
 $status = $_GET['status'] ?? '';
 $sort = $_GET['sort'] ?? 'terbaru';
 
 $whereStatus = "";
-
-if($status != ""){
-    $whereStatus = "AND hewan.status='$status'";
+if ($status == 'Tersedia' || $status == 'Terjual') {
+    $whereStatus = "AND hewan.status = '" . mysqli_real_escape_string($conn, $status) . "'";
 }
 
-$sort = $_GET['sort'] ?? 'terbaru';
-
-switch($sort){
-
+switch ($sort) {
     case 'terlama':
         $order = "hewan.created_at ASC";
         break;
-
     case 'harga_tertinggi':
         $order = "hewan.harga DESC";
         break;
-
     case 'harga_terendah':
         $order = "hewan.harga ASC";
         break;
-
     default:
         $order = "hewan.updated_at DESC";
         break;
 }
 
-
-$query = mysqli_query($conn,
-"SELECT 
-    hewan.*,
-
-    COALESCE(SUM(pengeluaran.nominal),0) 
-    AS total_pengeluaran
-
-FROM hewan
-
-LEFT JOIN pengeluaran
-ON hewan.id = pengeluaran.hewan_id
-
-WHERE hewan.user_id='$user_id'
-$whereStatus
-
-GROUP BY hewan.id
-
-ORDER BY $order
-
-    ");
+$query = mysqli_query($conn, "
+    SELECT 
+        hewan.*,
+        COALESCE(SUM(pengeluaran.nominal),0) AS total_pengeluaran
+    FROM hewan
+    LEFT JOIN pengeluaran ON hewan.id = pengeluaran.hewan_id
+    WHERE hewan.user_id = '$user_id'
+    $whereStatus
+    GROUP BY hewan.id
+    ORDER BY $order
+");
 
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 
-    <title>Data Hewan</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Hewan - Dashboard Peternak</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <link rel="stylesheet" link href="style.css">
+    <link rel="stylesheet" href="../../style.css">
 
 </head>
 <body>
@@ -84,15 +68,15 @@ ORDER BY $order
 
         <div>
             <h2 class="page-title">
-            Data Hewan
+                Data Hewan
             </h2>
 
-            <p class="page-subtitle">
-            Kelola hewan Ternak Anda
+            <p class="page-subtitle text-muted">
+                Kelola hewan ternak Anda
             </p>
 
-             <a href="../user.php" class="btn btn-outline-secondary">
-            ← Dashboard
+            <a href="../user.php" class="btn btn-outline-secondary">
+                ← Dashboard
             </a>
         </div>
 
@@ -107,53 +91,38 @@ ORDER BY $order
     <div class="card-body">
 
         <!-- Dropdown Urutkan -->
-<form method="GET" class="row mb-3">
+        <form method="GET" class="row mb-3">
 
-    <div class="col-md-3">
-        <select name="status" class="form-select" onchange="this.form.submit()">
+            <div class="col-md-3">
+                <select name="status" class="form-select" onchange="this.form.submit()">
+                    <option value="">Semua Status</option>
+                    <option value="Tersedia" <?= ($status == 'Tersedia') ? 'selected' : ''; ?>>
+                        Tersedia
+                    </option>
+                    <option value="Terjual" <?= ($status == 'Terjual') ? 'selected' : ''; ?>>
+                        Terjual
+                    </option>
+                </select>
+            </div>
 
-            <option value="">Semua Status</option>
+            <div class="col-md-3">
+                <select name="sort" class="form-select" onchange="this.form.submit()">
+                    <option value="terbaru" <?= ($sort == 'terbaru') ? 'selected' : ''; ?>>
+                        Terbaru
+                    </option>
+                    <option value="terlama" <?= ($sort == 'terlama') ? 'selected' : ''; ?>>
+                        Terlama
+                    </option>
+                    <option value="harga_tertinggi" <?= ($sort == 'harga_tertinggi') ? 'selected' : ''; ?>>
+                        Harga Tertinggi
+                    </option>
+                    <option value="harga_terendah" <?= ($sort == 'harga_terendah') ? 'selected' : ''; ?>>
+                        Harga Terendah
+                    </option>
+                </select>
+            </div>
 
-            <option value="Tersedia"
-                <?= ($status=='Tersedia') ? 'selected' : ''; ?>>
-                Tersedia
-            </option>
-
-            <option value="Terjual"
-                <?= ($status=='Terjual') ? 'selected' : ''; ?>>
-                Terjual
-            </option>
-
-        </select>
-    </div>
-
-    <div class="col-md-3">
-        <select name="sort" class="form-select" onchange="this.form.submit()">
-
-            <option value="terbaru"
-                <?= ($sort=='terbaru') ? 'selected' : ''; ?>>
-                Terbaru
-            </option>
-
-            <option value="terlama"
-                <?= ($sort=='terlama') ? 'selected' : ''; ?>>
-                Terlama
-            </option>
-
-            <option value="harga_tertinggi"
-                <?= ($sort=='harga_tertinggi') ? 'selected' : ''; ?>>
-                Harga Tertinggi
-            </option>
-
-            <option value="harga_terendah"
-                <?= ($sort=='harga_terendah') ? 'selected' : ''; ?>>
-                Harga Terendah
-            </option>
-
-        </select>
-    </div>
-
-</form>
+        </form>
 
         <div class="table-responsive">
 
@@ -169,84 +138,71 @@ ORDER BY $order
                             <th>Status</th>
                             <th>Tanggal Terjual</th>
                             <th>Aksi</th>
-                            
                         </tr>
                     </thead>
 
                     <tbody>
 
-                    <?php while($data = mysqli_fetch_assoc($query)) : ?>
-                    
+                    <?php while ($data = mysqli_fetch_assoc($query)) : ?>
                         
-<?php
-$total_pengeluaran = $data['total_pengeluaran'] ?? 0;
-
-$hasil = $data['harga'] - $total_pengeluaran;
-?>   
+                    <?php
+                    $total_pengeluaran = (float)($data['total_pengeluaran'] ?? 0);
+                        $hasil = (float)$data['harga'] - $total_pengeluaran;
+                        $fotoPath = (!empty($data['foto']) && file_exists('../../images/hewan/' . $data['foto']))
+                            ? '../../images/hewan/' . htmlspecialchars($data['foto'])
+                            : '../../images/default.jpg';
+                        ?>   
                         <tr>
                             <td>
-                                <img src="../../images/hewan/<?php echo $data['foto']; ?>"
-                                style="width:90px; height:90px; object-fit:cover; border-radius:8px; cursor:pointer;"
-                                onclick="openImage(this.src)">
+                                <img src="<?= $fotoPath; ?>"
+                                     style="width:90px; height:90px; object-fit:cover; border-radius:8px; cursor:pointer;"
+                                     onclick="openImage(this.src)"
+                                     alt="Foto Hewan">
+                            </td>
+
+                            <td class="fw-bold">
+                                <?= htmlspecialchars($data['nama_hewan']); ?>
                             </td>
 
                             <td>
-                                <?php echo $data['nama_hewan']; ?>
+                                <?= htmlspecialchars($data['jenis']); ?>
                             </td>
 
                             <td>
-                                <?php echo $data['jenis']; ?>
+                                <?= htmlspecialchars($data['berat']); ?> <?= htmlspecialchars($data['satuan_berat']); ?>
                             </td>
 
                             <td>
-    <?php echo $data['berat']; ?>
-    <?php echo $data['satuan_berat']; ?>
-</td>
+                                <div>
+                                    Harga Jual: Rp <?= number_format($data['harga'], 0, ',', '.'); ?>
+                                </div>
+
+                                <div class="text-danger small">
+                                    Pengeluaran: Rp <?= number_format($total_pengeluaran, 0, ',', '.'); ?>
+                                </div>
+
+                                <?php if ($hasil >= 0) { ?>
+                                    <div class="text-success fw-bold small">
+                                        Estimasi Keuntungan: Rp <?= number_format($hasil, 0, ',', '.'); ?>
+                                    </div>
+                                <?php } else { ?>
+                                    <div class="text-danger fw-bold small">
+                                        Estimasi Kerugian: Rp <?= number_format(abs($hasil), 0, ',', '.'); ?>
+                                    </div>
+                                <?php } ?>
+                            </td>
 
                             <td>
-
-    <div>
-        Harga Jual :
-        Rp <?php echo number_format($data['harga']); ?>
-    </div>
-
-
-    <div class="text-danger small">
-        Pengeluaran :
-        Rp <?php echo number_format($data['total_pengeluaran']); ?>
-    </div>
-
-    <?php if($hasil >= 0){ ?>
-
-        <div class="text-success fw-bold small">
-            Estimasi Keuntungan :
-            Rp <?php echo number_format($hasil); ?>
-        </div>
-
-    <?php }else{ ?>
-
-        <div class="text-danger fw-bold small">
-            Estimasi Kerugian :
-            Rp <?php echo number_format(abs($hasil)); ?>
-        </div>
-
-    <?php } ?>
-
-    <td>
-
-    <?php if($data['status'] == 'Tersedia'){ ?>
-
-        <span class="badge bg-success">
-            Tersedia
-        </span>
-
-    <?php }else{ ?>
-
-        <span class="badge bg-danger">
-            Terjual
-        </span>
-
-    <?php } ?>
+                                <?php if ($data['status'] == 'Tersedia') { ?>
+                                    <span class="badge bg-success">
+                                        Tersedia
+                                    </span>
+                                <?php } else { ?>
+                                    <span class="badge bg-danger">
+                                        Terjual
+                                    </span>
+                                <?php } ?>
+                            </td>
 
 </td>
 
@@ -254,17 +210,17 @@ $hasil = $data['harga'] - $total_pengeluaran;
 
     <?php
 
-    if($data['tanggal_terjual'] != NULL){
+    if ($data['tanggal_terjual'] != null) {
 
         echo date('d-m-Y H:i', strtotime($data['tanggal_terjual']));
 
-    }else{
+    } else {
 
         echo "-";
 
     }
 
-    ?>
+                        ?>
 
 </td>
 
@@ -286,12 +242,9 @@ $hasil = $data['harga'] - $total_pengeluaran;
     </a>
 
 </td>
+</tr>
 
-</td>
-
-                        </tr>
-
-                    <?php endwhile; ?>
+<?php endwhile; ?>
 
                     </tbody>
 

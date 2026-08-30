@@ -4,907 +4,471 @@ session_start();
 
 include '../../config/koneksi.php';
 
-if(!isset($_SESSION['user'])){
-    header("Location: ../index.php");
+if (!isset($_SESSION['user'])) {
+    header("Location: ../../home.php");
     exit;
 }
 
-if(isset($_POST['submit'])){
+if (isset($_POST['submit'])) {
 
-    $user_id = $_SESSION['user']['id'];
+    $user_id = (int)$_SESSION['user']['id'];
 
-    $nama = $_POST['nama_hewan'];
-    $ras = $_POST['ras'];
-    $jenis = $_POST['jenis'];
-    $berat = str_replace(',', '.', $_POST['berat']);
-    $satuan_berat = $_POST['satuan_berat'];
-    $umur = $_POST['umur'];
-    $harga = str_replace('.', '', $_POST['harga']);
-    $harga = (int) $harga;
-    $latitude = $_POST['latitude'];
-    $longitude = $_POST['longitude'];
+    $nama = trim($_POST['nama_hewan'] ?? '');
+    $ras = trim($_POST['ras'] ?? '');
+    $jenis = trim($_POST['jenis'] ?? '');
+    $berat = (float)str_replace(',', '.', $_POST['berat'] ?? '0');
+    $satuan_berat = trim($_POST['satuan_berat'] ?? 'kg');
+    $umur = trim($_POST['umur'] ?? '');
+    $harga = (int)str_replace('.', '', $_POST['harga'] ?? '0');
+    $latitude = trim($_POST['latitude'] ?? '');
+    $longitude = trim($_POST['longitude'] ?? '');
+    $deskripsi = trim($_POST['deskripsi'] ?? '');
+    $status = trim($_POST['status'] ?? 'Tersedia');
 
-    // Ambil dukuh peternak dari tabel users
-    $user = mysqli_fetch_assoc(mysqli_query($conn,
-    "SELECT desa FROM users WHERE id='$user_id'"));
-
-    $deskripsi = $_POST['deskripsi'];
-    $status = $_POST['status'];
-
-    // CEK JUMLAH FOTO
-
-if (
-    !isset($_FILES['foto']) ||
-    empty($_FILES['foto']['name'][0])
-) {
-    echo "
-    <script>
-    alert('Silakan pilih minimal 4 foto.');
-    window.history.back();
-    </script>
-    ";
-    exit;
-}
-
-$jumlahFoto = count($_FILES['foto']['name']);
-
-
-if($jumlahFoto < 4){
-
-    echo "
-    <script>
-    alert('Minimal upload 4 foto hewan');
-    window.history.back();
-    </script>
-    ";
-
-    exit;
-
-}
-
-
-if($jumlahFoto > 6){
-
-    echo "
-    <script>
-    alert('Maksimal upload 6 foto hewan');
-    window.history.back();
-    </script>
-    ";
-
-    exit;
-
-}
-
-
-// FOTO PERTAMA UNTUK MARKETPLACE
-
-
-$ext = strtolower(
-    pathinfo($namaFotoUtama, PATHINFO_EXTENSION)
-);
-
-
-
-
-    $insert = mysqli_query($conn,
-    "INSERT INTO hewan(
-        user_id,
-        nama_hewan,
-        ras,
-        jenis,
-        berat,
-        umur,
-        harga,
-        deskripsi,
-        latitude,
-        longitude,
-        foto,
-        status
-        
-    ) VALUES(
-        '$user_id',
-        '$nama',
-        '$ras',
-        '$jenis',
-        '$berat',
-        '$umur',
-        '$harga',
-        '$deskripsi',
-        '$latitude', 
-        '$longitude',
-        '',
-        '$status'
-    )");
-
-    if($insert){
-
-    $id_hewan = mysqli_insert_id($conn);
-
-// SIMPAN SEMUA FOTO
-
-$fotoPertama = "";
-
-
-for($i=0;$i<$jumlahFoto;$i++){
-
-    $namaFoto = $_FILES['foto']['name'][$i];
-
-    $tmpFoto = $_FILES['foto']['tmp_name'][$i];
-
-
-    $namaBaru = time().'_'.$i.'_'.$namaFoto;
-
-
-    move_uploaded_file(
-        $tmpFoto,
-        "../../images/hewan/".$namaBaru
-    );
-
-
-    // foto pertama untuk marketplace
-    if($i==0){
-
-        $fotoPertama = $namaBaru;
-
+    // Cek jumlah foto
+    if (!isset($_FILES['foto']) || empty($_FILES['foto']['name'][0])) {
+        echo "<script>
+            alert('Silakan pilih minimal 4 foto.');
+            window.history.back();
+        </script>";
+        exit;
     }
 
+    $jumlahFoto = count($_FILES['foto']['name']);
 
-    mysqli_query($conn,"
-    INSERT INTO hewan_foto
-    (hewan_id,foto)
+    if ($jumlahFoto < 4) {
+        echo "<script>
+            alert('Minimal upload 4 foto hewan');
+            window.history.back();
+        </script>";
+        exit;
+    }
 
-    VALUES
-    ('$id_hewan','$namaBaru')
+    if ($jumlahFoto > 6) {
+        echo "<script>
+            alert('Maksimal upload 6 foto hewan');
+            window.history.back();
+        </script>";
+        exit;
+    }
+
+    // Validasi ekstensi semua foto sebelum upload
+    $ekstensiOk = ['jpg', 'jpeg', 'png', 'webp'];
+    for ($i = 0; $i < $jumlahFoto; $i++) {
+        $namaFoto = $_FILES['foto']['name'][$i];
+        $ext = strtolower(pathinfo($namaFoto, PATHINFO_EXTENSION));
+        if (!in_array($ext, $ekstensiOk)) {
+            echo "<script>
+                alert('Format foto tidak didukung. Gunakan JPG, JPEG, PNG, atau WEBP.');
+                window.history.back();
+            </script>";
+            exit;
+        }
+    }
+
+    // Pastikan folder upload ada
+    $uploadDir = "../../images/hewan/";
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+
+    // Insert data hewan menggunakan Prepared Statement
+    $stmt = mysqli_prepare($conn, "
+        INSERT INTO hewan (
+            user_id, nama_hewan, ras, jenis, berat, satuan_berat, umur, harga, deskripsi, latitude, longitude, foto, status, created_at, updated_at
+        ) VALUES (
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', ?, NOW(), NOW()
+        )
     ");
-
-}
-
-
-// update foto utama marketplace
-
-mysqli_query($conn,"
-UPDATE hewan
-SET foto='$fotoPertama'
-WHERE id='$id_hewan'
-");
-
-    echo "
-<script>
-
-let pilihan = confirm(
-'✅ Data hewan berhasil disimpan.\\n\\n' +
-'Sebelum hewan ditampilkan di Marketplace, apakah Anda ingin menambahkan data pengeluaran terlebih dahulu?\\n\\n' +
-'OK = Tambah Pengeluaran\\n' +
-'Cancel = Langsung Tampilkan ke Marketplace'
-);
-
-if(pilihan){
-
-    window.location='../pengeluaran/tambah.php?hewan_id=".$id_hewan."';
-
-}else{
-
-    alert(
-        'Hewan akan langsung ditampilkan di Marketplace.'
+    mysqli_stmt_bind_param(
+        $stmt,
+        "isssdssissss",
+        $user_id,
+        $nama,
+        $ras,
+        $jenis,
+        $berat,
+        $satuan_berat,
+        $umur,
+        $harga,
+        $deskripsi,
+        $latitude,
+        $longitude,
+        $status
     );
 
-    window.location='../../home.php#marketplace';
+    if (mysqli_stmt_execute($stmt)) {
+        $id_hewan = mysqli_insert_id($conn);
+        $fotoPertama = "";
 
-}
+        // Upload semua foto dan insert ke hewan_foto
+        $stmtFoto = mysqli_prepare($conn, "INSERT INTO hewan_foto (hewan_id, foto) VALUES (?, ?)");
 
-</script>
-";
+        for ($i = 0; $i < $jumlahFoto; $i++) {
+            $namaFoto = $_FILES['foto']['name'][$i];
+            $tmpFoto = $_FILES['foto']['tmp_name'][$i];
+            $ext = strtolower(pathinfo($namaFoto, PATHINFO_EXTENSION));
 
-}
+            $namaBaru = time() . '_' . $i . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
 
+            if (move_uploaded_file($tmpFoto, $uploadDir . $namaBaru)) {
+                if ($i === 0) {
+                    $fotoPertama = $namaBaru;
+                }
+
+                mysqli_stmt_bind_param($stmtFoto, "is", $id_hewan, $namaBaru);
+                mysqli_stmt_execute($stmtFoto);
+            }
+        }
+
+        // Update foto utama untuk marketplace
+        if (!empty($fotoPertama)) {
+            $stmtUpdateFoto = mysqli_prepare($conn, "UPDATE hewan SET foto = ? WHERE id = ?");
+            mysqli_stmt_bind_param($stmtUpdateFoto, "si", $fotoPertama, $id_hewan);
+            mysqli_stmt_execute($stmtUpdateFoto);
+        }
+
+        echo "
+        <script>
+        let pilihan = confirm(
+            '✅ Data hewan berhasil disimpan.\\n\\n' +
+            'Sebelum hewan ditampilkan di Marketplace, apakah Anda ingin menambahkan data pengeluaran terlebih dahulu?\\n\\n' +
+            'OK = Tambah Pengeluaran\\n' +
+            'Cancel = Langsung Tampilkan ke Marketplace'
+        );
+
+        if (pilihan) {
+            window.location='../pengeluaran/tambah.php?hewan_id=" . $id_hewan . "';
+        } else {
+            alert('Hewan akan langsung ditampilkan di Marketplace.');
+            window.location='../../home.php#marketplace';
+        }
+        </script>
+        ";
+        exit;
+    } else {
+        echo "<script>
+            alert('Gagal menyimpan data hewan: " . addslashes(mysqli_error($conn)) . "');
+            window.history.back();
+        </script>";
+        exit;
+    }
 }
 ?>
-
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-
-    <title>Tambah Hewan</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Hewan - Dashboard Peternak</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="../../style.css">
 </head>
-<body>
+<body class="bg-light">
 
-<div class="container py-5">
+<div class="container py-5" style="max-width: 800px;">
 
-    <div class="d-flex align-items-center justify-content-between mb-4 p-3 bg-white rounded shadow-sm nav-box">
+    <div class="d-flex align-items-center justify-content-between mb-4 p-4 bg-white rounded shadow-sm">
+        <div>
+            <h3 class="mb-1 fw-bold text-dark">Tambah Hewan</h3>
+            <small class="text-muted">Input data dan foto hewan ternak baru</small>
+        </div>
 
-    <!-- KIRI: NAVIGASI + JUDUL -->
-    <div class="d-flex align-items-center gap-2">
-
-        <a href="index.php" class="btn btn-outline-secondary btn-sm nav-btn">
-            ← 
+        <a href="index.php" class="btn btn-outline-secondary btn-sm">
+            ← Kembali
         </a>
-
-        <div class="ms-3">
-            <h3 class="mb-0 fw-bold">
-                Tambah Hewan
-            </h3>
-            <small class="text-muted">Input data hewan ternak baru</small>
-        </div>
-
     </div>
 
-</div>
+    <div class="card border-0 shadow-sm p-4">
+        <form method="POST" enctype="multipart/form-data">
 
-    <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="latitude" id="latitude">
+            <input type="hidden" name="longitude" id="longitude">
 
-    <input type="hidden" name="latitude" id="latitude">
+            <!-- Nama Hewan -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Nama / Kode Hewan</label>
+                <input type="text"
+                       name="nama_hewan"
+                       class="form-control"
+                       placeholder="Contoh: Sapi Limousin Super A"
+                       required>
+            </div>
 
-    <input type="hidden" name="longitude" id="longitude">
+            <!-- Kategori Hewan -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Kategori Hewan</label>
+                <select name="jenis_hewan" id="jenis_hewan" class="form-select" required>
+                    <option value="">Pilih Kategori Hewan</option>
+                    <option value="Sapi">Sapi</option>
+                    <option value="Kambing">Kambing</option>
+                    <option value="Domba">Domba</option>
+                    <option value="Ayam">Ayam</option>
+                    <option value="Burung">Burung</option>
+                </select>
+            </div>
 
-        <div class="mb-3">
-            <label>Nama Hewan</label>
+            <!-- Ras -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Ras</label>
+                <select name="ras" id="ras" class="form-select" required disabled>
+                    <option value="">Pilih kategori hewan terlebih dahulu</option>
+                </select>
+            </div>
 
-            <input type="text" 
-             name="nama_hewan" 
-             class="form-control" 
-             required>
-        </div>
+            <!-- Jenis Kelamin -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Jenis Kelamin</label>
+                <select name="jenis" class="form-select">
+                    <option value="Jantan">Jantan</option>
+                    <option value="Betina">Betina</option>
+                </select>
+            </div>
 
-<div class="mb-3">
-    <label>Jenis Hewan</label>
+            <!-- Berat -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Berat</label>
+                <div class="input-group">
+                    <input type="text"
+                           name="berat"
+                           id="berat"
+                           class="form-control"
+                           inputmode="decimal"
+                           placeholder="Contoh: 0,8 atau 350"
+                           required>
+                    <select name="satuan_berat" class="form-select" style="max-width: 120px;">
+                        <option value="kg">Kg</option>
+                        <option value="gram">Gram</option>
+                    </select>
+                </div>
+                <small class="text-muted">Contoh: 350 kg atau 750 gram</small>
+            </div>
 
-    <select name="jenis_hewan" id="jenis_hewan" class="form-select" required>
-        <option value="">Pilih Jenis Hewan</option>
-        <option value="Sapi">Sapi</option>
-        <option value="Kambing">Kambing</option>
-        <option value="Domba">Domba</option>
-        <option value="Ayam">Ayam</option>
-        <option value="Burung">Burung</option>
-    </select>
-</div>
+            <!-- Umur -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Umur</label>
+                <input type="text"
+                       name="umur"
+                       class="form-control"
+                       placeholder="Contoh: 2 tahun 3 bulan"
+                       required>
+            </div>
 
-<div class="mb-3">
-    <label>Ras</label>
+            <!-- Harga -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Harga Jual (Rp)</label>
+                <div class="input-group">
+                    <span class="input-group-text">Rp</span>
+                    <input type="text"
+                           id="harga"
+                           name="harga"
+                           class="form-control"
+                           placeholder="Contoh: 22.000.000"
+                           inputmode="numeric"
+                           required>
+                </div>
+            </div>
 
-    <select name="ras" id="ras" class="form-select" required disabled>
-        <option value="">Pilih jenis hewan terlebih dahulu</option>
-    </select>
-</div>
+            <!-- Deskripsi -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Deskripsi / Keterangan Hewan</label>
+                <textarea name="deskripsi"
+                          class="form-control"
+                          rows="3"
+                          placeholder="Jelaskan kondisi kesehatan, pakan, vaksinasi, dll."></textarea>
+            </div>
 
-        <div class="mb-3">
+            <!-- Lokasi GPS -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Lokasi Peternakan (GPS)</label>
+                <button type="button"
+                        onclick="ambilLokasi()"
+                        class="btn btn-outline-primary btn-sm d-block mb-2">
+                    📍 Ambil Lokasi Saya
+                </button>
 
-            <label>Jenis</label>
+                <iframe id="mapPreview"
+                        width="100%"
+                        height="250"
+                        style="border: 0; border-radius: 12px; display: none;"
+                        loading="lazy"></iframe>
+                <small class="text-muted">Klik tombol untuk mengambil koordinat lokasi kandang otomatis via GPS.</small>
+            </div>
 
-            <select name="jenis" class="form-select">
+            <!-- Status -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Status Ketersediaan</label>
+                <select name="status" class="form-select">
+                    <option value="Tersedia">Tersedia</option>
+                    <option value="Terjual">Terjual</option>
+                </select>
+            </div>
 
-                <option>Jantan</option>
-                <option>Betina</option>
-                
+            <!-- Foto Upload -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Foto Hewan (Minimal 4 - Maksimal 6)</label>
+                <input type="file"
+                       id="foto"
+                       name="foto[]"
+                       class="form-control"
+                       multiple
+                       accept="image/*">
 
-            </select>
+                <div class="mt-3">
+                    <h6 class="fw-semibold">Foto yang dipilih:</h6>
+                    <div id="previewFoto" class="d-flex gap-3 flex-wrap"></div>
+                    <p id="statusFoto" class="mt-2 small text-muted">Belum ada foto yang dipilih</p>
+                </div>
+            </div>
 
-        </div>
+            <button type="submit"
+                    name="submit"
+                    class="btn btn-success px-4 py-2 fw-semibold">
+                Simpan & Posting Hewan
+            </button>
 
-<div class="mb-3">
-    <label>Berat</label>
-
-    <div class="input-group">
-        <input type="text"
-               name="berat"
-               id="berat"
-               class="form-control"
-               inputmode="decimal"
-               placeholder="Contoh: 0,8"
-               required>
-
-        <select name="satuan_berat" class="form-select" style="max-width: 120px;">
-            <option value="kg">Kg</option>
-            <option value="gram">Gram</option>
-        </select>
+        </form>
     </div>
-
-    <small class="text-muted">
-        Contoh: 0,8 kg atau 750 gram
-    </small>
-</div>
-
-        <div class="mb-3">
-    <label>Umur</label>
-
-    <input type="text"
-           name="umur"
-           class="form-control"
-           placeholder="Contoh: 1 tahun 6 bulan"
-           required>
-
-    <small class="text-muted">
-        Masukkan umur lengkap beserta satuannya.
-    </small>
-</div>
-
-<div class="mb-3">
-    <label>Harga</label>
-
-    <div class="input-group">
-        <span class="input-group-text">Rp</span>
-
-        <input type="text"
-               id="harga"
-               name="harga"
-               class="form-control"
-               placeholder="Contoh: 3.000.000"
-               inputmode="numeric"
-               required>
-    </div>
-
-    <small class="text-muted">
-        Masukkan harga tanpa mengetik titik secara manual.
-    </small>
-</div>
-
-        <div class="mb-3">
-
-            <label>Deskripsi</label>
-
-            <textarea name="deskripsi"
-                      class="form-control"></textarea>
-
-        </div>
-
-        <div class="mb-3">
-
-<label>Lokasi Peternakan</label>
-
-<button type="button"
-onclick="ambilLokasi()"
-class="btn btn-primary">
-
-📍 Ambil Lokasi Saya
-
-</button>
-
-<div class="mt-3">
-
-<iframe
-id="mapPreview"
-width="100%"
-height="300"
-style="border:0; border-radius:15px; display:none;"
-loading="lazy">
-</iframe>
-
-</div>
-
-<small class="d-block text-muted mt-2">
-Klik tombol untuk mengambil lokasi kandang otomatis
-</small>
-
-</div>
-
-        <!-- STATUS -->
-        <div class="mb-3">
-
-            <label>Status</label>
-
-            <select name="status" class="form-select">
-
-                <option value="Tersedia">
-                    Tersedia
-                </option>
-
-                <option value="Terjual">
-                    Terjual
-                </option>
-
-            </select>
-
-        </div>
-
-        <!-- FOTO -->
-        <div class="mb-3">
-
-<label>Foto Hewan (Minimal 4 - Maksimal 6)</label>
-
-<input type="file"
-id="foto"
-name="foto[]"
-class="form-control"
-multiple
-accept="image/*">
-
-
-<!-- TRACK RECORD FOTO -->
-<div class="mt-3">
-
-<h6 class="fw-bold">
-Foto yang dipilih:
-</h6>
-
-
-<div id="previewFoto" 
-class="d-flex gap-3 flex-wrap">
-
-</div>
-
-<p id="statusFoto" class="mt-2 text-muted">
-
-Belum ada foto
-
-</p>
-
-
-</div>
-
-
-</div>
-
-        <button type="submit"
-                name="submit"
-                class="btn btn-success"
-                onclick="return konfirmasiJual()">
-
-            Simpan
-
-        </button>
-
-    </form>
 
 </div>
 
 <script>
-function konfirmasiJual(){
-    return confirm(
-        "Verifikasi Penjualan\n\n" +
-        "Hewan ini akan ditampilkan di Marketplace dan dapat dilihat oleh calon pembeli.\n\n" +
-        "Apakah Anda yakin ingin melanjutkan?"
-    );
-}
-</script>
-
-<script>
-
 const jenisHewan = document.getElementById('jenis_hewan');
 const ras = document.getElementById('ras');
 
 const daftarRas = {
-
-    Sapi: [
-        "Limousin",
-        "Simmental",
-        "PO",
-        "Bali",
-        "Brahman",
-        "Madura",
-        "Lainnya"
-    ],
-
-    Kambing: [
-        "Jawa",
-        "Etawa",
-        "Kacang",
-        "Boer",
-        "Jawarandu",
-        "Lainnya"
-    ],
-
-    Domba: [
-        "Garut",
-        "Merino",
-        "Texel",
-        "Domba Lokal",
-        "Lainnya"
-    ],
-
-    Ayam: [
-        "Kampung",
-        "Broiler",
-        "Bangkok",
-        "Cemani",
-        "Joper",
-        "Petelur",
-        "Lainnya"
-    ],
-
-    Burung: [
-        "Kenari",
-        "Kenari Yorkshire",
-        "Lovebird",
-        "Murai Batu",
-        "Kacer",
-        "Cucak Ijo",
-        "Pleci",
-        "Perkutut",
-        "Jalak",
-        "Lainnya"
-    ]
-
+    Sapi: ["Limousin", "Simmental", "PO", "Bali", "Brahman", "Madura", "Lainnya"],
+    Kambing: ["Jawa", "Etawa", "Kacang", "Boer", "Jawarandu", "Lainnya"],
+    Domba: ["Garut", "Merino", "Texel", "Domba Lokal", "Lainnya"],
+    Ayam: ["Kampung", "Broiler", "Bangkok", "Cemani", "Joper", "Petelur", "Lainnya"],
+    Burung: ["Kenari", "Kenari Yorkshire", "Lovebird", "Murai Batu", "Kacer", "Cucak Ijo", "Pleci", "Perkutut", "Jalak", "Lainnya"]
 };
 
-jenisHewan.addEventListener('change', function(){
-
+jenisHewan.addEventListener('change', function() {
     const jenis = this.value;
-
     ras.innerHTML = "";
 
-    if(!jenis){
-
+    if (!jenis) {
         ras.disabled = true;
-
-        ras.innerHTML =
-            '<option value="">Pilih jenis hewan terlebih dahulu</option>';
-
+        ras.innerHTML = '<option value="">Pilih kategori hewan terlebih dahulu</option>';
         return;
     }
 
     ras.disabled = false;
-
-    ras.innerHTML =
-        '<option value="">Pilih Ras</option>';
-
-    daftarRas[jenis].forEach(function(namaRas){
-
+    ras.innerHTML = '<option value="">Pilih Ras</option>';
+    daftarRas[jenis].forEach(function(namaRas) {
         const option = document.createElement('option');
-
         option.value = namaRas;
         option.textContent = namaRas;
-
         ras.appendChild(option);
-
     });
-
 });
 
-</script>
-
-<script>
-
-document.getElementById('berat').addEventListener('input', function(){
-
-    let value = this.value;
-
-    value = value.replace(/[^0-9,]/g, '');
-
+document.getElementById('berat').addEventListener('input', function() {
+    let value = this.value.replace(/[^0-9,]/g, '');
     let bagian = value.split(',');
-
-    if(bagian.length > 2){
-
+    if (bagian.length > 2) {
         value = bagian[0] + ',' + bagian.slice(1).join('');
-
     }
-
     this.value = value;
-
 });
 
-</script>
-
-<script>
-
-function ambilLokasi(){
-
-    if(navigator.geolocation){
-
-        navigator.geolocation.getCurrentPosition(
-        
-        function(position){
-
-            document.getElementById('latitude').value =
-            position.coords.latitude;
-
-            document.getElementById('longitude').value =
-            position.coords.longitude;
-
-
-            let akurasi = Math.round(position.coords.accuracy);
-
-
-if(akurasi > 1000){
-
-    alert(
-    "Lokasi kurang akurat.\n\n" +
-    "Akurasi saat ini: "+akurasi+" meter\n\n" +
-    "Silakan tekan Ambil Lokasi lagi di tempat terbuka."
-    );
-
-    return;
-
-}else{
-
-    alert(
-    "Lokasi berhasil diambil.\n\n" +
-    "Akurasi: "+akurasi+" meter"
-    );
-
-}
-
-        },
-
-        function(error){
-
-            alert("Lokasi gagal diambil. Pastikan GPS aktif.");
-
-        },
-
-        {
-            enableHighAccuracy: true,
-            timeout: 60000,
-            maximumAge: 0
-        }
-
-        );
-
-    }else{
-
-        alert("Browser tidak mendukung GPS");
-
-    }
-
-}
-
-</script>
-
-<script>
-function konfirmasiJual(){
-...
-}
-</script>
-
-
-<script>
-
-function ambilLokasi(){
-
-    if(navigator.geolocation){
-
-        navigator.geolocation.getCurrentPosition(
-
-        function(position){
-
-            let lat = position.coords.latitude;
-            let lng = position.coords.longitude;
-
-
-            document.getElementById('latitude').value = lat;
-            document.getElementById('longitude').value = lng;
-
-
-            // tampilkan maps
-            let map = document.getElementById('mapPreview');
-
-            map.style.display = "block";
-
-            map.src =
-            "https://www.google.com/maps?q="
-            +lat+","+lng+
-            "&output=embed";
-
-
-            alert(
-            "Lokasi berhasil diambil\n\n" +
-            "Akurasi sekitar: " +
-            Math.round(position.coords.accuracy)
-            +" meter"
-            );
-
-
-        },
-
-        function(){
-
-            alert(
-            "Lokasi gagal diambil.\nPastikan GPS aktif."
-            );
-
-        },
-
-        {
-
-            enableHighAccuracy:true,
-            timeout:60000,
-            maximumAge:0
-
-        }
-
-        );
-
-
-    }else{
-
-        alert("Browser tidak mendukung GPS");
-
-    }
-
-}
-
-</script>
-
-<script>
-
-
-let daftarFoto = [];
-
-const inputFoto = document.getElementById('foto');
-
-
-inputFoto.addEventListener('change', function(e){
-
-
-    let fileBaru = Array.from(e.target.files);
-
-
-    fileBaru.forEach(file=>{
-
-        if(daftarFoto.length < 6){
-
-            daftarFoto.push(file);
-
-        }
-
-    });
-
-
-    // kosongkan input agar bisa upload lagi
-    inputFoto.value="";
-
-
-    tampilkanFoto();
-
-});
-
-
-
-function tampilkanFoto(){
-
-
-let preview = document.getElementById('previewFoto');
-
-preview.innerHTML="";
-
-
-daftarFoto.forEach((file,index)=>{
-
-
-let reader = new FileReader();
-
-
-reader.onload=function(e){
-
-
-preview.innerHTML += `
-
-<div class="card shadow-sm"
-style="
-width:150px;
-flex-shrink:0;
-">
-
-
-<img src="${e.target.result}"
-style="
-width:150px;
-height:120px;
-object-fit:cover;
-border-radius:10px;
-">
-
-
-<div class="p-2">
-
-
-<small>
-Foto ${index+1}
-</small>
-
-
-<button type="button"
-class="btn btn-danger btn-sm w-100 mt-2"
-onclick="hapusFoto(${index})">
-
-Hapus
-
-</button>
-
-
-</div>
-
-
-</div>
-
-`;
-
-
-}
-
-
-reader.readAsDataURL(file);
-
-
-
-});
-
-
-
-let jumlah = daftarFoto.length;
-
-
-let statusFoto=document.getElementById('statusFoto');
-
-
-if(jumlah < 4){
-
-
-statusFoto.innerHTML =
-"⚠️ Minimal 4 foto ("+jumlah+"/6)";
-
-
-statusFoto.className="text-danger";
-
-
-}else{
-
-
-statusFoto.innerHTML =
-"✅ Foto memenuhi syarat ("+jumlah+"/6)";
-
-
-statusFoto.className="text-success";
-
-
-}
-
-
-}
-
-
-
-
-function hapusFoto(index){
-
-
-daftarFoto.splice(index,1);
-
-
-tampilkanFoto();
-
-
-}
-
-
-
-// sebelum submit masukkan foto ke form
-document.querySelector('form').addEventListener('submit',function(e){
-
-
-let dataTransfer = new DataTransfer();
-
-
-daftarFoto.forEach(file=>{
-
-    dataTransfer.items.add(file);
-
-});
-
-
-inputFoto.files = dataTransfer.files;
-
-
-
-});
-
-
-</script>
-<script>
 const inputHarga = document.getElementById('harga');
-
 inputHarga.addEventListener('input', function () {
-
     let angka = this.value.replace(/\D/g, '');
-
     if (angka === '') {
         this.value = '';
         return;
     }
-
     this.value = new Intl.NumberFormat('id-ID').format(angka);
+});
+
+function ambilLokasi() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                let lat = position.coords.latitude;
+                let lng = position.coords.longitude;
+                document.getElementById('latitude').value = lat;
+                document.getElementById('longitude').value = lng;
+
+                let map = document.getElementById('mapPreview');
+                map.style.display = "block";
+                map.src = "https://www.google.com/maps?q=" + lat + "," + lng + "&output=embed";
+
+                alert("Lokasi berhasil diambil\nAkurasi sekitar: " + Math.round(position.coords.accuracy) + " meter");
+            },
+            function() {
+                alert("Lokasi gagal diambil. Pastikan GPS aktif.");
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 60000,
+                maximumAge: 0
+            }
+        );
+    } else {
+        alert("Browser tidak mendukung GPS");
+    }
+}
+
+let daftarFoto = [];
+const inputFoto = document.getElementById('foto');
+
+inputFoto.addEventListener('change', function(e) {
+    let fileBaru = Array.from(e.target.files);
+    fileBaru.forEach(file => {
+        if (daftarFoto.length < 6) {
+            daftarFoto.push(file);
+        }
+    });
+    inputFoto.value = "";
+    tampilkanFoto();
+});
+
+function tampilkanFoto() {
+    let preview = document.getElementById('previewFoto');
+    preview.innerHTML = "";
+
+    daftarFoto.forEach((file, index) => {
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML += `
+                <div class="card shadow-sm" style="width: 140px; flex-shrink: 0;">
+                    <img src="${e.target.result}" style="width: 140px; height: 110px; object-fit: cover; border-radius: 8px;">
+                    <div class="p-2 text-center">
+                        <small class="d-block mb-1">Foto ${index + 1}</small>
+                        <button type="button" class="btn btn-danger btn-sm w-100" onclick="hapusFoto(${index})">Hapus</button>
+                    </div>
+                </div>
+            `;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    let jumlah = daftarFoto.length;
+    let statusFoto = document.getElementById('statusFoto');
+    if (jumlah < 4) {
+        statusFoto.innerHTML = "⚠️ Minimal 4 foto (" + jumlah + "/6)";
+        statusFoto.className = "mt-2 small text-danger";
+    } else {
+        statusFoto.innerHTML = "✅ Foto memenuhi syarat (" + jumlah + "/6)";
+        statusFoto.className = "mt-2 small text-success";
+    }
+}
+
+function hapusFoto(index) {
+    daftarFoto.splice(index, 1);
+    tampilkanFoto();
+}
+
+document.querySelector('form').addEventListener('submit', function(e) {
+    let dataTransfer = new DataTransfer();
+    daftarFoto.forEach(file => {
+        dataTransfer.items.add(file);
+    });
+    inputFoto.files = dataTransfer.files;
 });
 </script>
 

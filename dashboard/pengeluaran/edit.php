@@ -4,169 +4,179 @@ session_start();
 
 include '../../config/koneksi.php';
 
-if(!isset($_SESSION['user'])){
-    header("Location: ../home.php");
+if (!isset($_SESSION['user'])) {
+    header("Location: ../../home.php");
     exit;
 }
 
-$id = $_GET['id'];
+$user_id = (int)$_SESSION['user']['id'];
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-$query = mysqli_query($conn,
-"SELECT * FROM pengeluaran
-WHERE id='$id'");
+// Cek kepemilikan data pengeluaran (Cegah IDOR)
+$stmt = mysqli_prepare($conn, "
+    SELECT p.*, h.nama_hewan 
+    FROM pengeluaran p
+    JOIN hewan h ON p.hewan_id = h.id
+    WHERE p.id = ? AND p.user_id = ?
+");
+mysqli_stmt_bind_param($stmt, "ii", $id, $user_id);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$data = mysqli_fetch_assoc($result);
 
-$data = mysqli_fetch_assoc($query);
-
+if (!$data) {
+    echo "<script>
+        alert('Data pengeluaran tidak ditemukan atau Anda tidak memiliki akses.');
+        window.location='index.php';
+    </script>";
+    exit;
+}
 
 // UPDATE DATA
-if(isset($_POST['update'])){
+if (isset($_POST['update'])) {
 
-    $nama = $_POST['nama_pengeluaran'];
-    $nominal = str_replace(',', '', $_POST['nominal']);
-    $keterangan = $_POST['keterangan'];
-    $tanggal = $_POST['tanggal'];
+    $nama = trim($_POST['nama_pengeluaran'] ?? '');
+    $nominalRaw = str_replace(',', '', str_replace('.', '', $_POST['nominal'] ?? '0'));
+    $nominal = (float)$nominalRaw;
+    $keterangan = trim($_POST['keterangan'] ?? '');
+    $tanggal = trim($_POST['tanggal'] ?? '');
 
-    mysqli_query($conn,
-    "UPDATE pengeluaran SET
+    if (empty($nama) || $nominal <= 0 || empty($tanggal)) {
+        echo "<script>
+            alert('Semua kolom wajib diisi dengan benar!');
+            window.history.back();
+        </script>";
+        exit;
+    }
 
-            nama_pengeluaran='$nama',
-            nominal='$nominal',
-            tanggal='$tanggal',
-            keterangan='$keterangan'
-
-    WHERE id='$id'
+    $stmtUpdate = mysqli_prepare($conn, "
+        UPDATE pengeluaran 
+        SET nama_pengeluaran = ?, nominal = ?, tanggal = ?, keterangan = ?
+        WHERE id = ? AND user_id = ?
     ");
+    mysqli_stmt_bind_param($stmtUpdate, "sdssii", $nama, $nominal, $tanggal, $keterangan, $id, $user_id);
 
-    echo "
-    <script>
-        alert('Pengeluaran berhasil diupdate');
-        window.location='index.php';
-    </script>
-    ";
+    if (mysqli_stmt_execute($stmtUpdate)) {
+        echo "<script>
+            alert('Pengeluaran berhasil diupdate');
+            window.location='index.php';
+        </script>";
+        exit;
+    } else {
+        echo "<script>
+            alert('Gagal mengupdate data: " . addslashes(mysqli_error($conn)) . "');
+            history.back();
+        </script>";
+        exit;
+    }
 
 }
 
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 
-    <title>Edit Pengeluaran</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Pengeluaran - <?= htmlspecialchars($data['nama_hewan']); ?></title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../style.css">
 
 </head>
 <body>
 
-<div class="container py-5">
+<div class="container py-5" style="max-width: 700px;">
 
-    <h2 class="mb-4">
-        Edit Pengeluaran
-    </h2>
+    <div class="card border-0 shadow-sm p-4">
 
-    <form method="POST">
+        <h2 class="mb-4 fw-bold">
+            Edit Pengeluaran
+        </h2>
 
-    <!-- Nama Pengeluaran -->
-    <div class="mb-3">
+        <p class="text-muted mb-4">
+            Hewan Terkait: <strong class="text-success"><?= htmlspecialchars($data['nama_hewan']); ?></strong>
+        </p>
 
-        <label>Nama Pengeluaran</label>
+        <form method="POST">
 
-        <input type="text"
-               name="nama_pengeluaran"
-               class="form-control"
-               value="<?php echo htmlspecialchars($data['nama_pengeluaran']); ?>"
-               required>
+            <!-- Nama Pengeluaran -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Nama Pengeluaran</label>
+                <input type="text"
+                       name="nama_pengeluaran"
+                       class="form-control"
+                       value="<?= htmlspecialchars($data['nama_pengeluaran']); ?>"
+                       required>
+            </div>
+
+            <!-- Nominal -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Nominal (Rp)</label>
+                <input type="text"
+                       name="nominal"
+                       id="nominal"
+                       class="form-control"
+                       value="<?= number_format($data['nominal'], 0, ',', '.'); ?>"
+                       inputmode="numeric"
+                       required>
+            </div>
+
+            <!-- Tanggal -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Tanggal</label>
+                <input type="date"
+                       name="tanggal"
+                       class="form-control"
+                       value="<?= htmlspecialchars($data['tanggal']); ?>"
+                       required>
+            </div>
+
+            <!-- Keterangan -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Keterangan</label>
+                <textarea name="keterangan"
+                          class="form-control"
+                          rows="4"
+                          required><?= htmlspecialchars($data['keterangan']); ?></textarea>
+            </div>
+
+            <!-- Tombol -->
+            <div class="d-flex gap-2">
+                <button type="submit"
+                        name="update"
+                        class="btn btn-success px-4">
+                    Update Pengeluaran
+                </button>
+
+                <a href="index.php"
+                   class="btn btn-secondary px-4">
+                    Kembali
+                </a>
+            </div>
+
+        </form>
 
     </div>
-
-
-    <!-- Nominal -->
-    <div class="mb-3">
-
-        <label>Nominal</label>
-
-        <input type="text"
-               name="nominal"
-               id="nominal"
-               class="form-control"
-               value="<?php echo number_format($data['nominal']); ?>"
-               inputmode="numeric"
-               required>
-
-    </div>
-
-
-    <!-- Tanggal -->
-    <div class="mb-3">
-
-        <label>Tanggal</label>
-
-        <input type="date"
-               name="tanggal"
-               class="form-control"
-               value="<?php echo $data['tanggal']; ?>"
-               required>
-
-    </div>
-
-
-    <!-- Keterangan -->
-    <div class="mb-3">
-
-        <label>Keterangan</label>
-
-        <textarea name="keterangan"
-                  class="form-control"
-                  rows="4"
-                  required><?php echo htmlspecialchars($data['keterangan']); ?></textarea>
-
-    </div>
-
-
-    <!-- Tombol -->
-    <button type="submit"
-            name="update"
-            class="btn btn-success">
-
-        Update
-
-    </button>
-
-    <a href="index.php"
-       class="btn btn-secondary">
-
-        Kembali
-
-    </a>
-
-</form>
 
 </div>
 
 <script>
-
 const nominalInput = document.getElementById('nominal');
 
 nominalInput.addEventListener('input', function() {
-
     let value = this.value.replace(/\D/g, '');
-
     if(value){
-        value = Number(value).toLocaleString('en-US');
+        value = Number(value).toLocaleString('id-ID');
     }
-
     this.value = value;
-
 });
-
 
 document.querySelector('form').addEventListener('submit', function() {
-
-    nominalInput.value = nominalInput.value.replace(/,/g, '');
-
+    nominalInput.value = nominalInput.value.replace(/\./g, '').replace(/,/g, '');
 });
-
 </script>
 
 </body>

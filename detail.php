@@ -2,65 +2,62 @@
 
 include 'config/koneksi.php';
 
-$id = $_GET['id'];
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-$stmt = mysqli_prepare($conn,"
-SELECT
-hewan.*,
-users.id AS user_id,
-users.nama,
-users.wa,
-users.email,
-users.alamat,
-users.desa,
-users.foto AS foto_user
-FROM hewan
-JOIN users ON hewan.user_id = users.id
-WHERE hewan.id = ?
+$stmt = mysqli_prepare($conn, "
+    SELECT
+        hewan.*,
+        users.id AS user_id,
+        users.nama,
+        users.wa,
+        users.email,
+        users.alamat,
+        users.desa,
+        users.foto AS foto_user
+    FROM hewan
+    JOIN users ON hewan.user_id = users.id
+    WHERE hewan.id = ?
 ");
 
-mysqli_stmt_bind_param($stmt,"i",$id);
+mysqli_stmt_bind_param($stmt, "i", $id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $data = mysqli_fetch_assoc($result);
 
-if(!$data){
+if (!$data) {
     echo "<script>
-    alert('Hewan tidak ditemukan');
-    window.location='home.php';
+        alert('Hewan tidak ditemukan');
+        window.location='home.php';
     </script>";
     exit;
 }
 
-$fotos = mysqli_query($conn,"
-SELECT foto
-FROM hewan_foto
-WHERE hewan_id='$id'
-ORDER BY RAND()
+$stmtFotos = mysqli_prepare($conn, "
+    SELECT foto
+    FROM hewan_foto
+    WHERE hewan_id = ?
 ");
+mysqli_stmt_bind_param($stmtFotos, "i", $id);
+mysqli_stmt_execute($stmtFotos);
+$resFotos = mysqli_stmt_get_result($stmtFotos);
 
-$listFoto=[];
-
-while($row=mysqli_fetch_assoc($fotos)){
-
-    if(!empty($row['foto'])){
-
-        $listFoto[]=$row['foto'];
-
+$listFoto = [];
+while ($row = mysqli_fetch_assoc($resFotos)) {
+    if (!empty($row['foto'])) {
+        $listFoto[] = $row['foto'];
     }
-
 }
 
+// Tambahkan foto utama hewan jika belum ada di listFoto
+if (!empty($data['foto']) && !in_array($data['foto'], $listFoto)) {
+    array_unshift($listFoto, $data['foto']);
+}
 
-// foto utama detail random
-if(count($listFoto)>0){
-
-    $fotoRandom=$listFoto[array_rand($listFoto)];
-
-}else{
-
-    $fotoRandom="default.jpg";
-
+// foto utama detail
+if (count($listFoto) > 0) {
+    $fotoUtamaAwal = $listFoto[0];
+} else {
+    $fotoUtamaAwal = "default.jpg";
 }
 ?>
 
@@ -87,11 +84,9 @@ if(count($listFoto)>0){
 
 <div class="container py-5">
 
-    <a href="home.php #marketplace"
+    <a href="home.php#marketplace"
        class="btn btn-outline-success mb-4">
-
-        ← Kembali Marketplace
-
+        ← Kembali ke Marketplace
     </a>
 
     <div class="card detail-card shadow">
@@ -102,14 +97,15 @@ if(count($listFoto)>0){
             <div class="col-lg-6">
 
                 <img id="fotoUtama"
-src="<?= !empty($fotoRandom) ? 'images/hewan/'.$fotoRandom : 'images/default.jpg'; ?>"
-class="detail-image">
+src="<?= (!empty($fotoUtamaAwal) && file_exists('images/hewan/' . $fotoUtamaAwal)) ? 'images/hewan/' . htmlspecialchars($fotoUtamaAwal) : 'images/default.jpg'; ?>"
+class="detail-image"
+alt="<?= htmlspecialchars($data['nama_hewan']); ?>">
 
                 <div class="d-flex flex-wrap gap-2 mt-3">
 
-<?php foreach($listFoto as $foto){ ?>
+<?php foreach ($listFoto as $foto) { ?>
 
-<?php if(file_exists("images/hewan/".$foto)){ ?>
+<?php if (file_exists("images/hewan/".$foto)) { ?>
 
 <img
 src="images/hewan/<?php echo $foto; ?>"
@@ -153,7 +149,7 @@ onclick="document.getElementById('fotoUtama').src=this.src;"
                         </span>
 
                         <!-- MAPS -->
-<?php if(!empty($data['latitude']) && !empty($data['longitude'])){ ?>
+<?php if (!empty($data['latitude']) && !empty($data['longitude'])) { ?>
 
 <div class="mb-4">
 
@@ -224,7 +220,7 @@ onclick="document.getElementById('fotoUtama').src=this.src;"
                                 </small>
 
                                <h5 class="fw-bold">
-    <?php 
+    <?php
         echo rtrim(
             rtrim(
                 number_format($data['berat'], 2, ',', '.'),
@@ -232,8 +228,8 @@ onclick="document.getElementById('fotoUtama').src=this.src;"
             ),
             ','
         );
-        echo ' ' . $data['satuan_berat'];
-    ?>
+echo ' ' . $data['satuan_berat'];
+?>
 </h5>
 
                             </div>

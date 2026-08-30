@@ -1,6 +1,4 @@
 <?php
-session_start();
 
-echo '<pre>';
-echo $_SESSION['user']['role'];
+header("Location: home.php");
 exit;

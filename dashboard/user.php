@@ -4,12 +4,12 @@ session_start();
 
 include '../config/koneksi.php';
 
-if(!isset($_SESSION['user'])){
+if (!isset($_SESSION['user'])) {
     header("Location: ../home.php");
     exit;
 }
 
-if($_SESSION['user']['role'] != 'peternak'){
+if ($_SESSION['user']['role'] != 'peternak') {
     header("Location: ../home.php");
     exit;
 }
@@ -184,20 +184,18 @@ $tahun_terjual_query = mysqli_query($conn, "
 
 ");
 
-while($row = mysqli_fetch_assoc($tahun_hewan_query)){
+while ($row = mysqli_fetch_assoc($tahun_hewan_query)) {
 
-    if(!empty($row['tahun'])){
+    if (!empty($row['tahun'])) {
         $tahun_data[] = (int)$row['tahun'];
     }
-
 }
 
-while($row = mysqli_fetch_assoc($tahun_terjual_query)){
+while ($row = mysqli_fetch_assoc($tahun_terjual_query)) {
 
-    if(!empty($row['tahun'])){
+    if (!empty($row['tahun'])) {
         $tahun_data[] = (int)$row['tahun'];
     }
-
 }
 
 /* Hilangkan tahun duplikat */
@@ -219,19 +217,17 @@ $tahun_default = !empty($tahun_data)
 
 $statistik_tahun = [];
 
-foreach($tahun_data as $tahun){
+foreach ($tahun_data as $tahun) {
 
     $statistik_tahun[$tahun] = [];
 
-    for($bulan = 1; $bulan <= 12; $bulan++){
+    for ($bulan = 1; $bulan <= 12; $bulan++) {
 
         $statistik_tahun[$tahun][$bulan] = [
             'hewan' => 0,
             'terjual' => 0
         ];
-
     }
-
 }
 
 
@@ -258,18 +254,16 @@ $query_bulanan_hewan = mysqli_query($conn, "
 ");
 
 
-while($row = mysqli_fetch_assoc($query_bulanan_hewan)){
+while ($row = mysqli_fetch_assoc($query_bulanan_hewan)) {
 
     $tahun = (int)$row['tahun'];
     $bulan = (int)$row['bulan'];
 
-    if(isset($statistik_tahun[$tahun][$bulan])){
+    if (isset($statistik_tahun[$tahun][$bulan])) {
 
         $statistik_tahun[$tahun][$bulan]['hewan'] =
             (int)$row['jumlah'];
-
     }
-
 }
 
 
@@ -297,18 +291,16 @@ $query_bulanan_terjual = mysqli_query($conn, "
 ");
 
 
-while($row = mysqli_fetch_assoc($query_bulanan_terjual)){
+while ($row = mysqli_fetch_assoc($query_bulanan_terjual)) {
 
     $tahun = (int)$row['tahun'];
     $bulan = (int)$row['bulan'];
 
-    if(isset($statistik_tahun[$tahun][$bulan])){
+    if (isset($statistik_tahun[$tahun][$bulan])) {
 
         $statistik_tahun[$tahun][$bulan]['terjual'] =
             (int)$row['jumlah'];
-
     }
-
 }
 
 /* =====================================================
@@ -317,7 +309,7 @@ while($row = mysqli_fetch_assoc($query_bulanan_terjual)){
 
 $hewan_data = [];
 
-while($h = mysqli_fetch_assoc($hewan_result)){
+while ($h = mysqli_fetch_assoc($hewan_result)) {
 
     $hewan_id = (int)$h['id'];
 
@@ -361,13 +353,13 @@ $pengeluaran_result = mysqli_query($conn, "
 ");
 
 
-while($p = mysqli_fetch_assoc($pengeluaran_result)){
+while ($p = mysqli_fetch_assoc($pengeluaran_result)) {
 
     $hewan_id = (int)$p['hewan_id'];
 
     $nominal = (float)$p['nominal'];
 
-    if(isset($hewan_data[$hewan_id])){
+    if (isset($hewan_data[$hewan_id])) {
 
         $hewan_data[$hewan_id]['total_pengeluaran'] += $nominal;
 
@@ -386,19 +378,17 @@ while($p = mysqli_fetch_assoc($pengeluaran_result)){
 $keuangan_tahun = [];
 
 /* Buat struktur 12 bulan untuk setiap tahun */
-foreach($tahun_data as $tahun){
+foreach ($tahun_data as $tahun) {
 
     $keuangan_tahun[$tahun] = [];
 
-    for($bulan = 1; $bulan <= 12; $bulan++){
+    for ($bulan = 1; $bulan <= 12; $bulan++) {
 
         $keuangan_tahun[$tahun][$bulan] = [
             'pengeluaran' => 0,
             'profit' => 0
         ];
-
     }
-
 }
 
 
@@ -428,18 +418,16 @@ $query_keuangan_pengeluaran = mysqli_query($conn, "
 ");
 
 
-while($row = mysqli_fetch_assoc($query_keuangan_pengeluaran)){
+while ($row = mysqli_fetch_assoc($query_keuangan_pengeluaran)) {
 
     $tahun = (int)$row['tahun'];
     $bulan = (int)$row['bulan'];
 
-    if(isset($keuangan_tahun[$tahun][$bulan])){
+    if (isset($keuangan_tahun[$tahun][$bulan])) {
 
         $keuangan_tahun[$tahun][$bulan]['pengeluaran'] =
             (float)$row['total'];
-
     }
-
 }
 
 
@@ -448,12 +436,12 @@ while($row = mysqli_fetch_assoc($query_keuangan_pengeluaran)){
    PROFIT = HARGA JUAL - TOTAL PENGELUARAN HEWAN
 ===================================================== */
 
-foreach($hewan_data as $h){
+foreach ($hewan_data as $h) {
 
-    if(
+    if (
         $h['status'] == 'Terjual' &&
         !empty($h['tanggal_terjual'])
-    ){
+    ) {
 
         $tahun = (int)date(
             'Y',
@@ -465,7 +453,7 @@ foreach($hewan_data as $h){
             strtotime($h['tanggal_terjual'])
         );
 
-        if(isset($keuangan_tahun[$tahun][$bulan])){
+        if (isset($keuangan_tahun[$tahun][$bulan])) {
 
             $profit =
                 $h['harga'] -
@@ -473,28 +461,25 @@ foreach($hewan_data as $h){
 
             $keuangan_tahun[$tahun][$bulan]['profit'] +=
                 $profit;
-
         }
-
     }
-
 }
 
 /* =====================================================
    BENTUK AKTIVITAS BERDASARKAN TANGGAL
 ===================================================== */
 
-foreach($hewan_data as $h){
+foreach ($hewan_data as $h) {
 
     /* ==========================================
        1. HEWAN DITAMBAHKAN
     ========================================== */
 
-    if(!empty($h['created_at'])){
+    if (!empty($h['created_at'])) {
 
         $tanggal = date('Y-m-d', strtotime($h['created_at']));
 
-        if(!isset($statistik[$tanggal])){
+        if (!isset($statistik[$tanggal])) {
 
             $statistik[$tanggal] = [
                 'hewan' => [],
@@ -522,14 +507,14 @@ foreach($hewan_data as $h){
        MENGIKUTI TANGGAL PENGELUARAN
     ========================================== */
 
-    foreach($h['pengeluaran_detail'] as $p){
+    foreach ($h['pengeluaran_detail'] as $p) {
 
         $tanggal = date(
             'Y-m-d',
             strtotime($p['tanggal'])
         );
 
-        if(!isset($statistik[$tanggal])){
+        if (!isset($statistik[$tanggal])) {
 
             $statistik[$tanggal] = [
                 'hewan' => [],
@@ -558,17 +543,17 @@ foreach($hewan_data as $h){
        MENGIKUTI TANGGAL TERJUAL
     ========================================== */
 
-    if(
+    if (
         $h['status'] == 'Terjual' &&
         !empty($h['tanggal_terjual'])
-    ){
+    ) {
 
         $tanggal = date(
             'Y-m-d',
             strtotime($h['tanggal_terjual'])
         );
 
-        if(!isset($statistik[$tanggal])){
+        if (!isset($statistik[$tanggal])) {
 
             $statistik[$tanggal] = [
                 'hewan' => [],
@@ -635,7 +620,7 @@ $data_profit = [];
 $detail_statistik = [];
 
 
-foreach($statistik as $tanggal => $data){
+foreach ($statistik as $tanggal => $data) {
 
     $obj = new DateTime($tanggal);
 
@@ -704,7 +689,7 @@ foreach($statistik as $tanggal => $data){
     <meta charset="UTF-8">
 
     <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+        content="width=device-width, initial-scale=1.0">
 
 
     <link
@@ -718,752 +703,735 @@ foreach($statistik as $tanggal => $data){
 
 
     <style>
-
-    /* =======================================
+        /* =======================================
        DASHBOARD USER MODERN
     ======================================= */
 
-    *{
-        box-sizing:border-box;
-    }
+        * {
+            box-sizing: border-box;
+        }
 
 
-    body{
+        body {
 
-        margin:0;
+            margin: 0;
 
-        font-family:'Poppins',sans-serif;
+            font-family: 'Poppins', sans-serif;
 
-        background:
-        radial-gradient(
-            circle at top left,
-            rgba(46,125,50,.25),
-            transparent 25%
-        ),
+            background:
+                radial-gradient(circle at top left,
+                    rgba(46, 125, 50, .25),
+                    transparent 25%),
 
-        linear-gradient(
-            135deg,
-            #081018,
-            #0d1b24,
-            #09131d
-        );
+                linear-gradient(135deg,
+                    #081018,
+                    #0d1b24,
+                    #09131d);
 
-        min-height:100vh;
+            min-height: 100vh;
 
-        color:white;
-    }
+            color: white;
+        }
 
 
-    /* =======================================
+        /* =======================================
        SIDEBAR
     ======================================= */
 
-    .sidebar{
+        .sidebar {
 
-        width:270px;
+            width: 270px;
 
-        height:100vh;
+            height: 100vh;
 
-        position:fixed;
+            position: fixed;
 
-        top:0;
+            top: 0;
 
-        left:0;
+            left: 0;
 
-        background:
-        rgba(10,15,20,.88);
+            background:
+                rgba(10, 15, 20, .88);
 
-        backdrop-filter:blur(18px);
+            backdrop-filter: blur(18px);
 
-        border-right:
-        1px solid
-        rgba(255,255,255,.08);
+            border-right:
+                1px solid rgba(255, 255, 255, .08);
 
-        padding:30px 20px;
+            padding: 30px 20px;
 
-        z-index:999;
-    }
-
-
-    .sidebar h3{
-
-        color:white;
-
-        font-size:30px;
-
-        font-weight:700;
-
-        margin-bottom:25px;
-    }
+            z-index: 999;
+        }
 
 
-    .sidebar hr{
+        .sidebar h3 {
 
-        border-color:
-        rgba(255,255,255,.08);
-    }
+            color: white;
 
+            font-size: 30px;
 
-    .sidebar a{
+            font-weight: 700;
 
-        display:flex;
-
-        align-items:center;
-
-        gap:14px;
-
-        text-decoration:none;
-
-        color:#d7e5f2;
-
-        padding:16px 18px;
-
-        border-radius:18px;
-
-        margin-bottom:14px;
-
-        transition:.3s;
-    }
+            margin-bottom: 25px;
+        }
 
 
-    .sidebar a i{
+        .sidebar hr {
 
-        font-size:20px;
-    }
-
-
-    .sidebar a:hover{
-
-        background:
-        linear-gradient(
-            135deg,
-            #2E7D32,
-            #00c853
-        );
-
-        transform:
-        translateX(5px);
-
-        color:white;
-
-        box-shadow:
-        0 10px 25px
-        rgba(46,125,50,.35);
-    }
+            border-color:
+                rgba(255, 255, 255, .08);
+        }
 
 
-    /* =======================================
+        .sidebar a {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 14px;
+
+            text-decoration: none;
+
+            color: #d7e5f2;
+
+            padding: 16px 18px;
+
+            border-radius: 18px;
+
+            margin-bottom: 14px;
+
+            transition: .3s;
+        }
+
+
+        .sidebar a i {
+
+            font-size: 20px;
+        }
+
+
+        .sidebar a:hover {
+
+            background:
+                linear-gradient(135deg,
+                    #2E7D32,
+                    #00c853);
+
+            transform:
+                translateX(5px);
+
+            color: white;
+
+            box-shadow:
+                0 10px 25px rgba(46, 125, 50, .35);
+        }
+
+
+        /* =======================================
        CONTENT
     ======================================= */
 
-    .content{
+        .content {
 
-        margin-left:270px;
+            margin-left: 270px;
 
-        padding:40px;
-    }
-
-
-    .content h2{
-
-        font-size:42px;
-
-        font-weight:700;
-
-        color:#fff;
-    }
+            padding: 40px;
+        }
 
 
-    .content > p{
+        .content h2 {
 
-        color:#b0bec5;
-    }
+            font-size: 42px;
+
+            font-weight: 700;
+
+            color: #fff;
+        }
 
 
-    /* =======================================
+        .content>p {
+
+            color: #b0bec5;
+        }
+
+
+        /* =======================================
        CARD
     ======================================= */
 
-    .stats-card{
+        .stats-card {
 
-        background:
-        rgba(255,255,255,.06)!important;
+            background:
+                rgba(255, 255, 255, .06) !important;
 
-        border:
-        1px solid
-        rgba(255,255,255,.08);
+            border:
+                1px solid rgba(255, 255, 255, .08);
 
-        border-radius:30px;
+            border-radius: 30px;
 
-        backdrop-filter:blur(20px);
+            backdrop-filter: blur(20px);
 
-        overflow:hidden;
+            overflow: hidden;
 
-        position:relative;
+            position: relative;
 
-        color:white;
+            color: white;
 
-        transition:.4s;
-    }
-
-
-    .stats-card::before{
-
-        content:'';
-
-        position:absolute;
-
-        width:180px;
-
-        height:180px;
-
-        background:
-        rgba(255,255,255,.03);
-
-        border-radius:50%;
-
-        top:-70px;
-
-        right:-70px;
-    }
+            transition: .4s;
+        }
 
 
-    .stats-card:hover{
+        .stats-card::before {
 
-        transform:
-        translateY(-8px);
+            content: '';
 
-        box-shadow:
-        0 20px 40px
-        rgba(0,0,0,.35);
-    }
+            position: absolute;
 
+            width: 180px;
 
-    .stats-card h5{
+            height: 180px;
 
-        color:#b0bec5;
+            background:
+                rgba(255, 255, 255, .03);
 
-        margin-bottom:15px;
-    }
+            border-radius: 50%;
 
+            top: -70px;
 
-    .stats-card h1{
-
-        font-size:42px;
-
-        font-weight:700;
-    }
+            right: -70px;
+        }
 
 
-    /* =======================================
+        .stats-card:hover {
+
+            transform:
+                translateY(-8px);
+
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, .35);
+        }
+
+
+        .stats-card h5 {
+
+            color: #b0bec5;
+
+            margin-bottom: 15px;
+        }
+
+
+        .stats-card h1 {
+
+            font-size: 42px;
+
+            font-weight: 700;
+        }
+
+
+        /* =======================================
        CHART CARD
     ======================================= */
 
-    .chart-card{
+        .chart-card {
 
-        background:
-        rgba(255,255,255,.06)!important;
+            background:
+                rgba(255, 255, 255, .06) !important;
 
-        border:
-        1px solid
-        rgba(255,255,255,.08);
+            border:
+                1px solid rgba(255, 255, 255, .08);
 
-        border-radius:30px;
+            border-radius: 30px;
 
-        backdrop-filter:blur(20px);
+            backdrop-filter: blur(20px);
 
-        color:white;
-    }
-
-
-    .chart-card h4{
-
-        font-weight:600;
-    }
+            color: white;
+        }
 
 
-    /* =======================================
+        .chart-card h4 {
+
+            font-weight: 600;
+        }
+
+
+        /* =======================================
        PERIODE
     ======================================= */
 
-    .periode-wrapper{
+        .periode-wrapper {
 
-        display:flex;
+            display: flex;
 
-        flex-direction:column;
+            flex-direction: column;
 
-        gap:5px;
-    }
-
-
-    .periode-wrapper label{
-
-        color:#90a4ae;
-
-        font-size:12px;
-
-        font-weight:500;
-    }
+            gap: 5px;
+        }
 
 
-    #periodeChart{
+        .periode-wrapper label {
 
-        width:190px;
+            color: #90a4ae;
 
-        background:#17232d;
+            font-size: 12px;
 
-        color:white;
-
-        border:
-        1px solid
-        #33434f;
-
-        border-radius:12px;
-
-        padding:10px 14px;
-
-        font-size:13px;
-    }
+            font-weight: 500;
+        }
 
 
-    #periodeChart option{
+        #periodeChart {
 
-        background:#17232d;
+            width: 190px;
 
-        color:white;
-    }
+            background: #17232d;
+
+            color: white;
+
+            border:
+                1px solid #33434f;
+
+            border-radius: 12px;
+
+            padding: 10px 14px;
+
+            font-size: 13px;
+        }
 
 
-    /* =======================================
+        #periodeChart option {
+
+            background: #17232d;
+
+            color: white;
+        }
+
+
+        /* =======================================
        INDIKATOR
     ======================================= */
 
-    .indicator-tabs{
+        .indicator-tabs {
 
-        display:flex;
+            display: flex;
 
-        flex-wrap:wrap;
+            flex-wrap: wrap;
 
-        gap:10px;
+            gap: 10px;
 
-        margin-top:10px;
+            margin-top: 10px;
 
-        margin-bottom:20px;
+            margin-bottom: 20px;
 
-        padding:6px;
+            padding: 6px;
 
-        background:
-        rgba(255,255,255,.035);
+            background:
+                rgba(255, 255, 255, .035);
 
-        border:
-        1px solid
-        rgba(255,255,255,.06);
+            border:
+                1px solid rgba(255, 255, 255, .06);
 
-        border-radius:16px;
+            border-radius: 16px;
 
-        width:max-content;
-    }
-
-
-    .indicator-btn{
-
-        border:none;
-
-        background:transparent;
-
-        color:#90a4ae;
-
-        padding:10px 16px;
-
-        border-radius:11px;
-
-        font-size:13px;
-
-        font-weight:500;
-
-        cursor:pointer;
-
-        transition:.3s;
-    }
+            width: max-content;
+        }
 
 
-    .indicator-btn:hover{
+        .indicator-btn {
 
-        color:white;
+            border: none;
 
-        background:
-        rgba(255,255,255,.06);
-    }
+            background: transparent;
+
+            color: #90a4ae;
+
+            padding: 10px 16px;
+
+            border-radius: 11px;
+
+            font-size: 13px;
+
+            font-weight: 500;
+
+            cursor: pointer;
+
+            transition: .3s;
+        }
 
 
-    .indicator-btn.active{
+        .indicator-btn:hover {
 
-        background:#2e7d32;
+            color: white;
 
-        color:white;
-
-        box-shadow:
-        0 5px 15px
-        rgba(46,125,50,.25);
-    }
+            background:
+                rgba(255, 255, 255, .06);
+        }
 
 
-    /* =======================================
+        .indicator-btn.active {
+
+            background: #2e7d32;
+
+            color: white;
+
+            box-shadow:
+                0 5px 15px rgba(46, 125, 50, .25);
+        }
+
+
+        /* =======================================
        CHART
     ======================================= */
 
-    .chart-wrapper{
+        .chart-wrapper {
 
-        height:420px;
+            height: 420px;
 
-        position:relative;
+            position: relative;
 
-        margin-top:10px;
-    }
+            margin-top: 10px;
+        }
 
-/* ==========================================
+        /* ==========================================
    PERBANDINGAN KEUANGAN
 ========================================== */
 
-.keuangan-section{
-    margin-top:50px;
-}
+        .keuangan-section {
+            margin-top: 50px;
+        }
 
-.keuangan-title{
-    color:white;
-    font-size:22px;
-    font-weight:700;
-    margin-bottom:4px;
-}
+        .keuangan-title {
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
 
-.keuangan-subtitle{
-    color:#90a4ae;
-    font-size:13px;
-}
+        .keuangan-subtitle {
+            color: #90a4ae;
+            font-size: 13px;
+        }
 
-.keuangan-indicator-tabs{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    margin-top:20px;
-    margin-bottom:20px;
-    padding:6px;
-    background:rgba(255,255,255,.035);
-    border:1px solid rgba(255,255,255,.06);
-    border-radius:16px;
-    width:max-content;
-}
+        .keuangan-indicator-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            padding: 6px;
+            background: rgba(255, 255, 255, .035);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 16px;
+            width: max-content;
+        }
 
-.keuangan-indicator-btn{
-    border:none;
-    background:transparent;
-    color:#90a4ae;
-    padding:10px 16px;
-    border-radius:11px;
-    font-size:13px;
-    font-weight:500;
-    cursor:pointer;
-    transition:.3s;
-}
+        .keuangan-indicator-btn {
+            border: none;
+            background: transparent;
+            color: #90a4ae;
+            padding: 10px 16px;
+            border-radius: 11px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: .3s;
+        }
 
-.keuangan-indicator-btn:hover{
-    color:white;
-    background:rgba(255,255,255,.06);
-}
+        .keuangan-indicator-btn:hover {
+            color: white;
+            background: rgba(255, 255, 255, .06);
+        }
 
-.keuangan-indicator-btn.active{
-    background:#2e7d32;
-    color:white;
-    box-shadow:
-        0 5px 15px
-        rgba(46,125,50,.25);
-}
+        .keuangan-indicator-btn.active {
+            background: #2e7d32;
+            color: white;
+            box-shadow:
+                0 5px 15px rgba(46, 125, 50, .25);
+        }
 
-.keuangan-chart-wrapper{
-    height:420px;
-    position:relative;
-    margin-top:10px;
-}
+        .keuangan-chart-wrapper {
+            height: 420px;
+            position: relative;
+            margin-top: 10px;
+        }
 
 
-/* ==========================================
+        /* ==========================================
    JARAK REKAM JEJAK
 ========================================== */
 
-.rekam-section{
-    margin-top:65px;
-}
+        .rekam-section {
+            margin-top: 65px;
+        }
 
-.rekam-section-title{
-    font-size:24px;
-    font-weight:700;
-    color:white;
-}
+        .rekam-section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+        }
 
-.rekam-section-subtitle{
-    color:#90a4ae;
-    font-size:13px;
-    margin-top:4px;
-}
+        .rekam-section-subtitle {
+            color: #90a4ae;
+            font-size: 13px;
+            margin-top: 4px;
+        }
 
-    
-/* ==========================================
+
+        /* ==========================================
    REKAM JEJAK
 ========================================== */
 
-.rekam-table{
-    margin-bottom:0;
-    color:white;
-}
+        .rekam-table {
+            margin-bottom: 0;
+            color: white;
+        }
 
-.rekam-table thead th{
-    color:#90a4ae;
-    background:rgba(255,255,255,.03);
-    border-color:rgba(255,255,255,.08);
-    font-size:12px;
-    font-weight:600;
-    padding:14px;
-}
+        .rekam-table thead th {
+            color: #90a4ae;
+            background: rgba(255, 255, 255, .03);
+            border-color: rgba(255, 255, 255, .08);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 14px;
+        }
 
-.rekam-table tbody td{
-    color:#ffffff;
-    background:rgba(255,255,255,.015);
-    border-color:rgba(255,255,255,.06);
-    padding:14px;
-    font-size:13px;
-}
+        .rekam-table tbody td {
+            color: #ffffff;
+            background: rgba(255, 255, 255, .015);
+            border-color: rgba(255, 255, 255, .06);
+            padding: 14px;
+            font-size: 13px;
+        }
 
-.rekam-table tbody tr:hover{
-    background:rgba(255,255,255,.05);
-}
+        .rekam-table tbody tr:hover {
+            background: rgba(255, 255, 255, .05);
+        }
 
-.rekam-tanggal{
-    font-weight:600;
-    color:white;
-}
+        .rekam-tanggal {
+            font-weight: 600;
+            color: white;
+        }
 
-.rekam-periode{
-    font-weight:600;
-    color:white;
-    font-size:14px;
-}
+        .rekam-periode {
+            font-weight: 600;
+            color: white;
+            font-size: 14px;
+        }
 
-.rekam-periode small{
-    display:block;
-    color:#90a4ae;
-    font-size:11px;
-    font-weight:400;
-    margin-top:3px;
-}
+        .rekam-periode small {
+            display: block;
+            color: #90a4ae;
+            font-size: 11px;
+            font-weight: 400;
+            margin-top: 3px;
+        }
 
-.rekam-jumlah{
-    color:#90a4ae;
-    font-size:12px;
-    line-height:1.7;
-}
+        .rekam-jumlah {
+            color: #90a4ae;
+            font-size: 12px;
+            line-height: 1.7;
+        }
 
-.rekam-jumlah{
-    color:#90a4ae;
-    font-size:12px;
-}
+        .rekam-jumlah {
+            color: #90a4ae;
+            font-size: 12px;
+        }
 
-.btn-lihat-detail{
-    border:1px solid rgba(255,255,255,.15);
-    background:rgba(46,125,50,.15);
-    color:#d7e5f2;
-    border-radius:10px;
-    padding:7px 13px;
-    font-size:12px;
-    cursor:pointer;
-}
+        .btn-lihat-detail {
+            border: 1px solid rgba(255, 255, 255, .15);
+            background: rgba(46, 125, 50, .15);
+            color: #d7e5f2;
+            border-radius: 10px;
+            padding: 7px 13px;
+            font-size: 12px;
+            cursor: pointer;
+        }
 
-.btn-lihat-detail:hover{
-    background:#2e7d32;
-    color:white;
-}
+        .btn-lihat-detail:hover {
+            background: #2e7d32;
+            color: white;
+        }
 
-/* ==========================================
+        /* ==========================================
    MODAL DETAIL REKAM JEJAK
 ========================================== */
 
-.detail-overlay{
+        .detail-overlay {
 
-    display:none;
+            display: none;
 
-    position:fixed;
+            position: fixed;
 
-    inset:0;
+            inset: 0;
 
-    background:rgba(0,0,0,.75);
+            background: rgba(0, 0, 0, .75);
 
-    z-index:2000;
+            z-index: 2000;
 
-    align-items:center;
+            align-items: center;
 
-    justify-content:center;
+            justify-content: center;
 
-    padding:25px;
+            padding: 25px;
 
-}
+        }
 
-.detail-overlay.show{
+        .detail-overlay.show {
 
-    display:flex;
+            display: flex;
 
-}
+        }
 
-.detail-modal-box{
+        .detail-modal-box {
 
-    width:100%;
+            width: 100%;
 
-    max-width:1100px;
+            max-width: 1100px;
 
-    max-height:90vh;
+            max-height: 90vh;
 
-    overflow:hidden;
+            overflow: hidden;
 
-    background:#101a23;
+            background: #101a23;
 
-    border:1px solid rgba(255,255,255,.10);
+            border: 1px solid rgba(255, 255, 255, .10);
 
-    border-radius:20px;
+            border-radius: 20px;
 
-    box-shadow:0 25px 60px rgba(0,0,0,.5);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, .5);
 
-}
+        }
 
-.detail-modal-header{
+        .detail-modal-header {
 
-    display:flex;
+            display: flex;
 
-    justify-content:space-between;
+            justify-content: space-between;
 
-    align-items:center;
+            align-items: center;
 
-    padding:20px 24px;
+            padding: 20px 24px;
 
-    border-bottom:1px solid rgba(255,255,255,.08);
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
 
-}
+        }
 
-.detail-modal-header h5{
+        .detail-modal-header h5 {
 
-    margin:0;
+            margin: 0;
 
-    color:white;
+            color: white;
 
-    font-weight:700;
+            font-weight: 700;
 
-}
+        }
 
-.detail-modal-header small{
+        .detail-modal-header small {
 
-    color:#90a4ae;
+            color: #90a4ae;
 
-}
+        }
 
-.detail-close{
+        .detail-close {
 
-    width:40px;
+            width: 40px;
 
-    height:40px;
+            height: 40px;
 
-    border:none;
+            border: none;
 
-    border-radius:10px;
+            border-radius: 10px;
 
-    background:rgba(255,255,255,.08);
+            background: rgba(255, 255, 255, .08);
 
-    color:white;
+            color: white;
 
-    font-size:25px;
+            font-size: 25px;
 
-    cursor:pointer;
+            cursor: pointer;
 
-}
+        }
 
-.detail-close:hover{
+        .detail-close:hover {
 
-    background:#2e7d32;
+            background: #2e7d32;
 
-}
+        }
 
-.detail-modal-body{
+        .detail-modal-body {
 
-    padding:20px 24px;
+            padding: 20px 24px;
 
-    max-height:60vh;
+            max-height: 60vh;
 
-    overflow-y:auto;
+            overflow-y: auto;
 
-}
+        }
 
-.detail-table{
+        .detail-table {
 
-    width:100%;
+            width: 100%;
 
-    border-collapse:collapse;
+            border-collapse: collapse;
 
-}
+        }
 
-.detail-table th{
+        .detail-table th {
 
-    padding:13px;
+            padding: 13px;
 
-    color:#90a4ae;
+            color: #90a4ae;
 
-    text-align:left;
+            text-align: left;
 
-    border-bottom:1px solid rgba(255,255,255,.08);
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
 
-}
+        }
 
-.detail-table td{
+        .detail-table td {
 
-    padding:13px;
+            padding: 13px;
 
-    color:white;
+            color: white;
 
-    border-bottom:1px solid rgba(255,255,255,.06);
+            border-bottom: 1px solid rgba(255, 255, 255, .06);
 
-}
+        }
 
-.detail-modal-footer{
+        .detail-modal-footer {
 
-    display:flex;
+            display: flex;
 
-    justify-content:flex-end;
+            justify-content: flex-end;
 
-    padding:16px 24px;
+            padding: 16px 24px;
 
-    border-top:1px solid rgba(255,255,255,.08);
+            border-top: 1px solid rgba(255, 255, 255, .08);
 
-}
+        }
 
-/* ==========================================
+        /* ==========================================
 JARAK DIAGRAM KEUANGAN → REKAM JEJAK
 ========================================== */
 
-.comparison-box{
-    margin-top:50px;
-}
+        .comparison-box {
+            margin-top: 50px;
+        }
 
-/* ==========================================
+        /* ==========================================
    JUDUL REKAM JEJAK AKTIVITAS
 ========================================== */
 
-.comparison-header strong{
-    font-size:22px;
-    font-weight:700;
-    color:#ffffff;
-    display:block;
-}
+        .comparison-header strong {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
+            display: block;
+        }
 
-.comparison-header .text-secondary{
-    font-size:13px;
-    color:#90a4ae!important;
-}
-
+        .comparison-header .text-secondary {
+            font-size: 13px;
+            color: #90a4ae !important;
+        }
     </style>
 
 </head>
@@ -1472,1367 +1440,1335 @@ JARAK DIAGRAM KEUANGAN → REKAM JEJAK
 <body>
 
 
-<!-- ==========================================
+    <!-- ==========================================
      SIDEBAR
 ========================================== -->
 
-<div class="sidebar">
+    <div class="sidebar">
 
-    <h3>🐄 TernakApp</h3>
+        <h3>🐄 TernakApp</h3>
 
-    <hr>
+        <hr>
 
+        <a href="user.php">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
 
-    <a href="hewan/index.php">
+        <a href="hewan/index.php">
+            <i class="bi bi-card-list"></i>
+            <span>Data Hewan</span>
+        </a>
 
-        <i class="bi bi-grid-fill"></i>
+        <a href="hewan/tambah.php">
+            <i class="bi bi-plus-circle"></i>
+            <span>Tambah Hewan</span>
+        </a>
 
-        Data Hewan
+        <a href="pengeluaran/index.php">
+            <i class="bi bi-wallet2"></i>
+            <span>Pengeluaran</span>
+        </a>
 
-    </a>
+        <a href="keuntungan.php">
+            <i class="bi bi-graph-up-arrow"></i>
+            <span>Keuntungan</span>
+        </a>
 
+        <a href="profil.php">
+            <i class="bi bi-person-circle"></i>
+            <span>Profil Saya</span>
+        </a>
 
-    <a href="hewan/tambah.php">
+        <a href="../home.php#marketplace">
+            <i class="bi bi-shop"></i>
+            <span>Marketplace</span>
+        </a>
 
-        <i class="bi bi-grid-fill"></i>
+        <a href="logout.php">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+        </a>
 
-        Tambah Hewan
-
-    </a>
-
-
-    <a href="pengeluaran/index.php">
-
-        <i class="bi bi-grid-fill"></i>
-
-        Pengeluaran
-
-    </a>
-
-
-    <a href="keuntungan.php">
-
-        <i class="bi bi-grid-fill"></i>
-
-        Keuntungan
-
-    </a>
-
-
-    <a href="profil.php">
-
-        Profil Saya
-
-    </a>
-
-
-    <a href="logout.php">
-
-        <i class="bi bi-grid-fill"></i>
-
-        Logout
-
-    </a>
-
-
-    <a href="../home.php"
-       class="btn btn-dark">
-
-        ← Kembali ke Home
-
-    </a>
-
-</div>
+    </div>
 
 
 
-<!-- ==========================================
+    <!-- ==========================================
      CONTENT
 ========================================== -->
 
-<div class="content">
+    <div class="content">
 
 
-    <h2>
+        <h2>
 
-        Selamat Datang,
-        <?php echo htmlspecialchars($_SESSION['user']['nama']); ?>
+            Selamat Datang,
+            <?php echo htmlspecialchars($_SESSION['user']['nama']); ?>
 
-    </h2>
-
-
-    <p>
-
-        Dashboard Peternak
-
-    </p>
+        </h2>
 
 
+        <p>
 
-    <!-- ======================================
+            Dashboard Peternak
+
+        </p>
+
+
+
+        <!-- ======================================
          STAT CARD
     ======================================= -->
 
- <div class="row g-4 mt-3">
+        <div class="row g-4 mt-3">
 
-    <!-- TOTAL HEWAN -->
+            <!-- TOTAL HEWAN -->
 
-    <div class="col-md-3">
+            <div class="col-md-3">
 
-        <div class="card-custom stats-card p-4">
+                <div class="card-custom stats-card p-4">
 
-            <h5>
-                Total Hewan
-            </h5>
+                    <h5>
+                        Total Hewan
+                    </h5>
 
-            <h1>
-                <?php
-                echo number_format(
-                    (int)$total_hewan['total'],
-                    0,
-                    ',',
-                    '.'
-                );
-                ?>
-            </h1>
+                    <h1>
+                        <?php
+                        echo number_format(
+                            (int)$total_hewan['total'],
+                            0,
+                            ',',
+                            '.'
+                        );
+?>
+                    </h1>
 
-            <small class="text-secondary">
-                Semua hewan yang diposting
-            </small>
+                    <small class="text-secondary">
+                        Semua hewan yang diposting
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- TOTAL PENGELUARAN -->
+
+            <div class="col-md-3">
+
+                <div class="card-custom stats-card p-4">
+
+                    <h5>
+                        Total Pengeluaran
+                    </h5>
+
+                    <h1>
+
+                        Rp
+                        <?php
+echo number_format(
+    (float)($total_pengeluaran['total'] ?: 0),
+    0,
+    ',',
+    '.'
+);
+?>
+
+                    </h1>
+
+                    <small class="text-secondary">
+                        Semua biaya yang tercatat
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- TOTAL TERJUAL -->
+
+            <div class="col-md-3">
+
+                <div class="card-custom stats-card p-4">
+
+                    <h5>
+                        Total Terjual
+                    </h5>
+
+                    <h1>
+
+                        <?php
+echo number_format(
+    (int)$total_terjual['total'],
+    0,
+    ',',
+    '.'
+);
+?>
+
+                    </h1>
+
+                    <small class="text-secondary">
+                        Hewan yang sudah terjual
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- PROFIT -->
+
+            <div class="col-md-3">
+
+                <div class="card-custom stats-card p-4">
+
+                    <h5>
+                        Profit Terealisasi
+                    </h5>
+
+                    <h1>
+
+                        Rp
+                        <?php
+echo number_format(
+    $total_profit,
+    0,
+    ',',
+    '.'
+);
+?>
+
+                    </h1>
+
+                    <small class="text-secondary">
+                        Dari hewan yang sudah terjual
+                    </small>
+
+                </div>
+
+            </div>
 
         </div>
 
-    </div>
 
 
-    <!-- TOTAL PENGELUARAN -->
-
-    <div class="col-md-3">
-
-        <div class="card-custom stats-card p-4">
-
-            <h5>
-                Total Pengeluaran
-            </h5>
-
-            <h1>
-
-                Rp
-                <?php
-                echo number_format(
-                    (float)($total_pengeluaran['total'] ?: 0),
-                    0,
-                    ',',
-                    '.'
-                );
-                ?>
-
-            </h1>
-
-            <small class="text-secondary">
-                Semua biaya yang tercatat
-            </small>
-
-        </div>
-
-    </div>
-
-
-    <!-- TOTAL TERJUAL -->
-
-    <div class="col-md-3">
-
-        <div class="card-custom stats-card p-4">
-
-            <h5>
-                Total Terjual
-            </h5>
-
-            <h1>
-
-                <?php
-                echo number_format(
-                    (int)$total_terjual['total'],
-                    0,
-                    ',',
-                    '.'
-                );
-                ?>
-
-            </h1>
-
-            <small class="text-secondary">
-                Hewan yang sudah terjual
-            </small>
-
-        </div>
-
-    </div>
-
-
-    <!-- PROFIT -->
-
-    <div class="col-md-3">
-
-        <div class="card-custom stats-card p-4">
-
-            <h5>
-                Profit Terealisasi
-            </h5>
-
-            <h1>
-
-                Rp
-                <?php
-                echo number_format(
-                    $total_profit,
-                    0,
-                    ',',
-                    '.'
-                );
-                ?>
-
-            </h1>
-
-            <small class="text-secondary">
-                Dari hewan yang sudah terjual
-            </small>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-
-    <!-- ======================================
+        <!-- ======================================
          CHART
     ======================================= -->
 
-    <div class="card-custom chart-card mt-4 p-4">
+        <div class="card-custom chart-card mt-4 p-4">
 
 
-        <!-- HEADER -->
+            <!-- HEADER -->
 
-        <div class="d-flex justify-content-between align-items-center mb-3 chart-header">
-
-
-            <div>
-
-                <h4 class="mb-1">
-
-                    📈 Perkembangan Aktivitas
-
-                </h4>
+            <div class="d-flex justify-content-between align-items-center mb-3 chart-header">
 
 
-                <p class="text-secondary mb-0">
+                <div>
 
-                    Rekam jejak perkembangan usaha berdasarkan tanggal
+                    <h4 class="mb-1">
 
-                </p>
+                        📈 Perkembangan Aktivitas
+
+                    </h4>
+
+
+                    <p class="text-secondary mb-0">
+
+                        Rekam jejak perkembangan usaha berdasarkan tanggal
+
+                    </p>
+
+                </div>
+
+
+                <!-- DROPDOWN TAHUN -->
+
+                <div class="periode-wrapper">
+
+                    <label for="periodeChart">
+                        Tahun Statistik
+                    </label>
+
+                    <select id="periodeChart">
+
+                        <?php
+
+if (!empty($tahun_data)) {
+
+    foreach ($tahun_data as $tahun) {
+
+        $selected =
+            ((int)$tahun === (int)$tahun_default)
+            ? 'selected'
+            : '';
+
+        echo '<option value="' .
+            $tahun .
+            '" ' .
+            $selected .
+            '>' .
+            $tahun .
+            '</option>';
+    }
+} else {
+
+    echo '<option value="">Belum ada data</option>';
+}
+
+?>
+
+                    </select>
+
+                </div>
 
             </div>
 
 
-<!-- DROPDOWN TAHUN -->
 
-<div class="periode-wrapper">
+            <div class="indicator-tabs">
 
-    <label for="periodeChart">
-        Tahun Statistik
-    </label>
+                <button
+                    class="indicator-btn active"
+                    data-indicator="semua">
 
-    <select id="periodeChart">
+                    Semua
 
-        <?php
+                </button>
 
-        if(!empty($tahun_data)){
+                <button
+                    class="indicator-btn"
+                    data-indicator="ditambahkan">
 
-            foreach($tahun_data as $tahun){
+                    🐄 Ditambahkan
 
-                $selected =
-                    ((int)$tahun === (int)$tahun_default)
-                    ? 'selected'
-                    : '';
+                </button>
 
-                echo '<option value="' .
-                    $tahun .
-                    '" ' .
-                    $selected .
-                    '>' .
-                    $tahun .
-                    '</option>';
+                <button
+                    class="indicator-btn"
+                    data-indicator="terjual">
 
-            }
+                    🛒 Terjual
 
-        }else{
+                </button>
 
-            echo '<option value="">Belum ada data</option>';
-
-        }
-
-        ?>
-
-    </select>
-
-</div>
-
-        </div>
+            </div>
 
 
 
-<div class="indicator-tabs">
-
-    <button
-        class="indicator-btn active"
-        data-indicator="semua">
-
-        Semua
-
-    </button>
-
-    <button
-        class="indicator-btn"
-        data-indicator="ditambahkan">
-
-        🐄 Ditambahkan
-
-    </button>
-
-    <button
-        class="indicator-btn"
-        data-indicator="terjual">
-
-        🛒 Terjual
-
-    </button>
-
-</div>
-
-
-
-        <!-- ==================================
+            <!-- ==================================
              CANVAS
         =================================== -->
 
-        <div class="chart-wrapper">
+            <div class="chart-wrapper">
 
-            <canvas id="perkembanganChart"></canvas>
+                <canvas id="perkembanganChart"></canvas>
 
-        </div>
+            </div>
 
-<!-- ==================================
+            <!-- ==================================
      DIAGRAM 2 - KEUANGAN
 =================================== -->
 
-<div class="card-custom chart-card mt-4 p-4">
+            <div class="card-custom chart-card mt-4 p-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
 
-        <div>
+                    <div>
 
-            <h4 class="mb-1">
-                💰 Perbandingan Keuangan
-            </h4>
+                        <h4 class="mb-1">
+                            💰 Perbandingan Keuangan
+                        </h4>
 
-            <p class="text-secondary mb-0">
-                Perbandingan profit dan pengeluaran berdasarkan bulan
-            </p>
+                        <p class="text-secondary mb-0">
+                            Perbandingan profit dan pengeluaran berdasarkan bulan
+                        </p>
 
-        </div>
+                    </div>
 
-    </div>
+                </div>
 
-    <div class="keuangan-indicator-tabs">
+                <div class="keuangan-indicator-tabs">
 
-    <button
-        class="keuangan-indicator-btn active"
-        data-keuangan="semua">
-        Semua
-    </button>
+                    <button
+                        class="keuangan-indicator-btn active"
+                        data-keuangan="semua">
+                        Semua
+                    </button>
 
-    <button
-        class="keuangan-indicator-btn"
-        data-keuangan="pengeluaran">
-        💸 Pengeluaran
-    </button>
+                    <button
+                        class="keuangan-indicator-btn"
+                        data-keuangan="pengeluaran">
+                        💸 Pengeluaran
+                    </button>
 
-    <button
-        class="keuangan-indicator-btn"
-        data-keuangan="profit">
-        💰 Profit
-    </button>
+                    <button
+                        class="keuangan-indicator-btn"
+                        data-keuangan="profit">
+                        💰 Profit
+                    </button>
 
-</div>
+                </div>
 
-    <div class="chart-wrapper">
+                <div class="chart-wrapper">
 
-        <canvas id="keuanganChart"></canvas>
-        
-    </div>
+                    <canvas id="keuanganChart"></canvas>
 
-</div>
+                </div>
 
-<!-- ==================================
+            </div>
+
+            <!-- ==================================
      REKAM JEJAK
 =================================== -->
 
-<div class="comparison-box mt-5">
+            <div class="comparison-box mt-5">
 
-    <div class="comparison-header">
+                <div class="comparison-header">
 
-        <div>
+                    <div>
 
-            <strong>
-                📋 Rekam Jejak Aktivitas
-            </strong>
+                        <strong>
+                            📋 Rekam Jejak Aktivitas
+                        </strong>
 
-            <div class="text-secondary small mt-1">
-                Riwayat aktivitas berdasarkan periode
+                        <div class="text-secondary small mt-1">
+                            Riwayat aktivitas berdasarkan periode
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="table rekam-table align-middle">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Periode</th>
+
+                                <th>Aktivitas</th>
+
+                                <th>Aksi</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="rekamJejakBody">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div
+                    id="rekamKosong"
+                    class="text-secondary text-center py-4"
+                    style="display:none;">
+
+                    Belum ada aktivitas pada tahun ini.
+
+                </div>
+
             </div>
 
-        </div>
-
-    </div>
 
 
-    <div class="table-responsive">
-
-        <table class="table rekam-table align-middle">
-
-            <thead>
-
-                <tr>
-
-                    <th>Periode</th>
-
-                    <th>Aktivitas</th>
-
-                    <th>Aksi</th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody id="rekamJejakBody">
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-
-    <div
-        id="rekamKosong"
-        class="text-secondary text-center py-4"
-        style="display:none;"
-    >
-
-        Belum ada aktivitas pada tahun ini.
-
-    </div>
-
-</div>
-
-
-
-<!-- ==========================================
+            <!-- ==========================================
      MODAL DETAIL REKAM JEJAK
 ========================================== -->
 
-<div id="detailAktivitasModal" class="detail-overlay">
+            <div id="detailAktivitasModal" class="detail-overlay">
 
-    <div class="detail-modal-box">
+                <div class="detail-modal-box">
 
-        <div class="detail-modal-header">
+                    <div class="detail-modal-header">
 
-            <div>
+                        <div>
 
-                <h5 id="detailModalTanggal">
-                    Detail Aktivitas
-                </h5>
+                            <h5 id="detailModalTanggal">
+                                Detail Aktivitas
+                            </h5>
 
-                <small id="detailModalSubjudul">
-                </small>
+                            <small id="detailModalSubjudul">
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail-modal-body">
+
+                        <div class="table-responsive">
+
+                            <table class="detail-table">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>Aktivitas</th>
+                                        <th>Nama Hewan</th>
+                                        <th>Jenis</th>
+                                        <th>Keterangan</th>
+                                        <th>Nominal</th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="detailModalBody">
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail-modal-footer">
+
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            onclick="tutupDetail()">
+                            Tutup
+                        </button>
+
+                    </div>
+
+                </div>
 
             </div>
 
-        </div>
-
-
-        <div class="detail-modal-body">
-
-            <div class="table-responsive">
-
-                <table class="detail-table">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>Aktivitas</th>
-                            <th>Nama Hewan</th>
-                            <th>Jenis</th>
-                            <th>Keterangan</th>
-                            <th>Nominal</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="detailModalBody">
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-
-        <div class="detail-modal-footer">
-
-            <button
-                type="button"
-                class="btn btn-secondary"
-                onclick="tutupDetail()"
-            >
-                Tutup
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-<!-- ==========================================
+            <!-- ==========================================
      CHART JS
 ========================================== -->
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
-
-/* =================================================
+            <script>
+                /* =================================================
    DATA STATISTIK BULANAN
 ================================================= */
 
-const statistikTahun =
-    <?php echo json_encode(
-        $statistik_tahun,
-        JSON_UNESCAPED_UNICODE
-    ); ?>;
+                const statistikTahun =
+                    <?php echo json_encode(
+                        $statistik_tahun,
+                        JSON_UNESCAPED_UNICODE
+                    ); ?>;
 
-const tahunDefault =
-    <?php echo json_encode($tahun_default); ?>;
+                const tahunDefault =
+                    <?php echo json_encode($tahun_default); ?>;
 
-/* =================================================
-   DATA KEUANGAN PER TAHUN
-================================================= */
+                /* =================================================
+                   DATA KEUANGAN PER TAHUN
+                ================================================= */
 
-const keuanganTahun =
-    <?php echo json_encode(
-        $keuangan_tahun,
-        JSON_UNESCAPED_UNICODE
-    ); ?>;
-
-
-/* =================================================
-   NAMA BULAN
-================================================= */
-
-const labelsBulan = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember'
-];
+                const keuanganTahun =
+                    <?php echo json_encode(
+                        $keuangan_tahun,
+                        JSON_UNESCAPED_UNICODE
+                    ); ?>;
 
 
-/* =================================================
-   CANVAS
-================================================= */
+                /* =================================================
+                   NAMA BULAN
+                ================================================= */
 
-const ctx =
-    document
-        .getElementById('perkembanganChart')
-        .getContext('2d');
-
-
-/* =================================================
-   DATASET AWAL
-================================================= */
-
-const datasets = [
-
-    {
-        label:'Hewan Ditambahkan',
-
-        data:[],
-
-        backgroundColor:'#00c853',
-
-        borderColor:'#00c853',
-
-        borderWidth:1,
-
-        borderRadius:7,
-
-        borderSkipped:false
-    },
-
-    {
-        label:'Hewan Terjual',
-
-        data:[],
-
-        backgroundColor:'#42a5f5',
-
-        borderColor:'#42a5f5',
-
-        borderWidth:1,
-
-        borderRadius:7,
-
-        borderSkipped:false
-    }
-
-];
+                const labelsBulan = [
+                    'Januari',
+                    'Februari',
+                    'Maret',
+                    'April',
+                    'Mei',
+                    'Juni',
+                    'Juli',
+                    'Agustus',
+                    'September',
+                    'Oktober',
+                    'November',
+                    'Desember'
+                ];
 
 
-/* =================================================
-   CHART
-================================================= */
+                /* =================================================
+                   CANVAS
+                ================================================= */
 
-const perkembanganChart =
-    new Chart(ctx, {
+                const ctx =
+                    document
+                    .getElementById('perkembanganChart')
+                    .getContext('2d');
 
-        type:'bar',
 
-        data:{
+                /* =================================================
+                   DATASET AWAL
+                ================================================= */
 
-            labels:labelsBulan,
+                const datasets = [
 
-            datasets:datasets
+                    {
+                        label: 'Hewan Ditambahkan',
 
-        },
+                        data: [],
 
-        options:{
+                        backgroundColor: '#00c853',
 
-            responsive:true,
+                        borderColor: '#00c853',
 
-            maintainAspectRatio:false,
+                        borderWidth: 1,
 
-            interaction:{
+                        borderRadius: 7,
 
-                intersect:false,
+                        borderSkipped: false
+                    },
 
-                mode:'index'
+                    {
+                        label: 'Hewan Terjual',
 
-            },
+                        data: [],
 
-            plugins:{
+                        backgroundColor: '#42a5f5',
 
-                legend:{
+                        borderColor: '#42a5f5',
 
-                    labels:{
+                        borderWidth: 1,
 
-                        color:'#d7e5f2',
+                        borderRadius: 7,
 
-                        usePointStyle:true,
-
-                        padding:18
-
+                        borderSkipped: false
                     }
 
-                },
+                ];
 
-                tooltip:{
 
-                    backgroundColor:
-                        'rgba(8,16,24,.96)',
+                /* =================================================
+                   CHART
+                ================================================= */
 
-                    titleColor:'#fff',
+                const perkembanganChart =
+                    new Chart(ctx, {
 
-                    bodyColor:'#d7e5f2',
+                        type: 'bar',
 
-                    padding:13,
+                        data: {
 
-                    cornerRadius:12,
+                            labels: labelsBulan,
 
-                    callbacks:{
+                            datasets: datasets
 
-                        label:function(context){
+                        },
 
-                            return (
-                                context.dataset.label +
-                                ': ' +
-                                Math.round(context.parsed.y) +
-                                ' ekor'
+                        options: {
+
+                            responsive: true,
+
+                            maintainAspectRatio: false,
+
+                            interaction: {
+
+                                intersect: false,
+
+                                mode: 'index'
+
+                            },
+
+                            plugins: {
+
+                                legend: {
+
+                                    labels: {
+
+                                        color: '#d7e5f2',
+
+                                        usePointStyle: true,
+
+                                        padding: 18
+
+                                    }
+
+                                },
+
+                                tooltip: {
+
+                                    backgroundColor: 'rgba(8,16,24,.96)',
+
+                                    titleColor: '#fff',
+
+                                    bodyColor: '#d7e5f2',
+
+                                    padding: 13,
+
+                                    cornerRadius: 12,
+
+                                    callbacks: {
+
+                                        label: function(context) {
+
+                                            return (
+                                                context.dataset.label +
+                                                ': ' +
+                                                Math.round(context.parsed.y) +
+                                                ' ekor'
+                                            );
+
+                                        }
+
+                                    }
+
+                                }
+
+                            },
+
+                            scales: {
+
+                                y: {
+
+                                    beginAtZero: true,
+
+                                    ticks: {
+
+                                        color: '#90a4ae',
+
+                                        precision: 0,
+
+                                        callback: function(value) {
+
+                                            return value + ' ekor';
+
+                                        }
+
+                                    },
+
+                                    title: {
+
+                                        display: true,
+
+                                        text: 'Jumlah Hewan',
+
+                                        color: '#90a4ae'
+
+                                    },
+
+                                    grid: {
+
+                                        color: 'rgba(255,255,255,.05)'
+
+                                    }
+
+                                },
+
+                                x: {
+
+                                    ticks: {
+
+                                        color: '#90a4ae',
+
+                                        maxRotation: 0,
+
+                                        minRotation: 0
+
+                                    },
+
+                                    grid: {
+
+                                        display: false
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                    });
+
+                /* =================================================
+                   DIAGRAM 2 - PROFIT VS PENGELUARAN
+                ================================================= */
+
+                const ctxKeuangan =
+                    document
+                    .getElementById('keuanganChart')
+                    .getContext('2d');
+
+
+                const keuanganChart =
+                    new Chart(ctxKeuangan, {
+
+                        type: 'bar',
+
+                        data: {
+
+                            labels: labelsBulan,
+
+                            datasets: [
+
+                                {
+                                    label: 'Profit',
+
+                                    data: [],
+
+                                    backgroundColor: '#00c853',
+
+                                    borderColor: '#00c853',
+
+                                    borderWidth: 1,
+
+                                    borderRadius: 7,
+
+                                    borderSkipped: false
+                                },
+
+                                {
+                                    label: 'Pengeluaran',
+
+                                    data: [],
+
+                                    backgroundColor: '#ffb300',
+
+                                    borderColor: '#ffb300',
+
+                                    borderWidth: 1,
+
+                                    borderRadius: 7,
+
+                                    borderSkipped: false
+                                }
+
+                            ]
+
+                        },
+
+                        options: {
+
+                            responsive: true,
+
+                            maintainAspectRatio: false,
+
+                            interaction: {
+
+                                intersect: false,
+
+                                mode: 'index'
+
+                            },
+
+                            plugins: {
+
+                                legend: {
+
+                                    labels: {
+
+                                        color: '#d7e5f2',
+
+                                        usePointStyle: true,
+
+                                        padding: 18
+
+                                    }
+
+                                },
+
+                                tooltip: {
+
+                                    backgroundColor: 'rgba(8,16,24,.96)',
+
+                                    titleColor: '#fff',
+
+                                    bodyColor: '#d7e5f2',
+
+                                    padding: 13,
+
+                                    cornerRadius: 12,
+
+                                    callbacks: {
+
+                                        label: function(context) {
+
+                                            return (
+                                                context.dataset.label +
+                                                ': ' +
+                                                formatRupiah(
+                                                    context.parsed.y
+                                                )
+                                            );
+
+                                        }
+
+                                    }
+
+                                }
+
+                            },
+
+                            scales: {
+
+                                y: {
+
+                                    beginAtZero: true,
+
+                                    ticks: {
+
+                                        color: '#90a4ae',
+
+                                        callback: function(value) {
+
+                                            return formatRupiah(value);
+
+                                        }
+
+                                    },
+
+                                    title: {
+
+                                        display: true,
+
+                                        text: 'Nominal (Rupiah)',
+
+                                        color: '#90a4ae'
+
+                                    },
+
+                                    grid: {
+
+                                        color: 'rgba(255,255,255,.05)'
+
+                                    }
+
+                                },
+
+                                x: {
+
+                                    ticks: {
+
+                                        color: '#90a4ae',
+
+                                        maxRotation: 0,
+
+                                        minRotation: 0
+
+                                    },
+
+                                    grid: {
+
+                                        display: false
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                    });
+
+
+                /* =================================================
+                   DATA REKAM JEJAK LAMA
+                   TETAP DIGUNAKAN UNTUK DETAIL
+                ================================================= */
+
+                const detailStatistik =
+                    <?php echo json_encode(
+                        $detail_statistik,
+                        JSON_UNESCAPED_UNICODE
+                    ); ?>;
+
+
+                /* =================================================
+                   FORMAT RUPIAH
+                ================================================= */
+
+                function formatRupiah(nilai) {
+
+                    return 'Rp ' +
+                        new Intl.NumberFormat(
+                            'id-ID'
+                        ).format(
+                            Number(nilai) || 0
+                        );
+
+                }
+
+
+                /* =================================================
+                   ESCAPE HTML
+                ================================================= */
+
+                function escapeHtml(text) {
+
+                    const div =
+                        document.createElement('div');
+
+                    div.textContent =
+                        text ?? '';
+
+                    return div.innerHTML;
+
+                }
+
+
+                /* =================================================
+                   UPDATE DATA DIAGRAM
+                ================================================= */
+
+                function updateChart(tahun) {
+
+                    const data =
+                        statistikTahun[tahun];
+
+                    const dataDitambahkan = [];
+
+                    const dataTerjual = [];
+
+
+                    for (let bulan = 1; bulan <= 12; bulan++) {
+
+                        if (data && data[bulan]) {
+
+                            dataDitambahkan.push(
+                                Number(data[bulan].hewan) || 0
                             );
 
-                        }
-
-                    }
-
-                }
-
-            },
-
-            scales:{
-
-                y:{
-
-                    beginAtZero:true,
-
-                    ticks:{
-
-                        color:'#90a4ae',
-
-                        precision:0,
-
-                        callback:function(value){
-
-                            return value + ' ekor';
-
-                        }
-
-                    },
-
-                    title:{
-
-                        display:true,
-
-                        text:'Jumlah Hewan',
-
-                        color:'#90a4ae'
-
-                    },
-
-                    grid:{
-
-                        color:
-                            'rgba(255,255,255,.05)'
-
-                    }
-
-                },
-
-                x:{
-
-                    ticks:{
-
-                        color:'#90a4ae',
-
-                        maxRotation:0,
-
-                        minRotation:0
-
-                    },
-
-                    grid:{
-
-                        display:false
-
-                    }
-
-                }
-
-            }
-
-        }
-
-    });
-
-/* =================================================
-   DIAGRAM 2 - PROFIT VS PENGELUARAN
-================================================= */
-
-const ctxKeuangan =
-    document
-        .getElementById('keuanganChart')
-        .getContext('2d');
-
-
-const keuanganChart =
-    new Chart(ctxKeuangan, {
-
-        type:'bar',
-
-        data:{
-
-            labels:labelsBulan,
-
-            datasets:[
-
-                {
-                    label:'Profit',
-
-                    data:[],
-
-                    backgroundColor:'#00c853',
-
-                    borderColor:'#00c853',
-
-                    borderWidth:1,
-
-                    borderRadius:7,
-
-                    borderSkipped:false
-                },
-
-                {
-                    label:'Pengeluaran',
-
-                    data:[],
-
-                    backgroundColor:'#ffb300',
-
-                    borderColor:'#ffb300',
-
-                    borderWidth:1,
-
-                    borderRadius:7,
-
-                    borderSkipped:false
-                }
-
-            ]
-
-        },
-
-        options:{
-
-            responsive:true,
-
-            maintainAspectRatio:false,
-
-            interaction:{
-
-                intersect:false,
-
-                mode:'index'
-
-            },
-
-            plugins:{
-
-                legend:{
-
-                    labels:{
-
-                        color:'#d7e5f2',
-
-                        usePointStyle:true,
-
-                        padding:18
-
-                    }
-
-                },
-
-                tooltip:{
-
-                    backgroundColor:
-                        'rgba(8,16,24,.96)',
-
-                    titleColor:'#fff',
-
-                    bodyColor:'#d7e5f2',
-
-                    padding:13,
-
-                    cornerRadius:12,
-
-                    callbacks:{
-
-                        label:function(context){
-
-                            return (
-                                context.dataset.label +
-                                ': ' +
-                                formatRupiah(
-                                    context.parsed.y
-                                )
+                            dataTerjual.push(
+                                Number(data[bulan].terjual) || 0
                             );
 
-                        }
+                        } else {
 
-                    }
+                            dataDitambahkan.push(0);
 
-                }
-
-            },
-
-            scales:{
-
-                y:{
-
-                    beginAtZero:true,
-
-                    ticks:{
-
-                        color:'#90a4ae',
-
-                        callback:function(value){
-
-                            return formatRupiah(value);
+                            dataTerjual.push(0);
 
                         }
 
-                    },
-
-                    title:{
-
-                        display:true,
-
-                        text:'Nominal (Rupiah)',
-
-                        color:'#90a4ae'
-
-                    },
-
-                    grid:{
-
-                        color:
-                            'rgba(255,255,255,.05)'
-
                     }
 
-                },
 
-                x:{
+                    perkembanganChart.data.labels =
+                        labelsBulan;
 
-                    ticks:{
+                    perkembanganChart.data.datasets[0].data =
+                        dataDitambahkan;
 
-                        color:'#90a4ae',
-
-                        maxRotation:0,
-
-                        minRotation:0
-
-                    },
-
-                    grid:{
-
-                        display:false
-
-                    }
-
-                }
-
-            }
-
-        }
-
-    });
+                    perkembanganChart.data.datasets[1].data =
+                        dataTerjual;
 
 
-/* =================================================
-   DATA REKAM JEJAK LAMA
-   TETAP DIGUNAKAN UNTUK DETAIL
-================================================= */
+                    perkembanganChart.update();
 
-const detailStatistik =
-    <?php echo json_encode(
-        $detail_statistik,
-        JSON_UNESCAPED_UNICODE
-    ); ?>;
-
-
-/* =================================================
-   FORMAT RUPIAH
-================================================= */
-
-function formatRupiah(nilai){
-
-    return 'Rp ' +
-        new Intl.NumberFormat(
-            'id-ID'
-        ).format(
-            Number(nilai) || 0
-        );
-
-}
-
-
-/* =================================================
-   ESCAPE HTML
-================================================= */
-
-function escapeHtml(text){
-
-    const div =
-        document.createElement('div');
-
-    div.textContent =
-        text ?? '';
-
-    return div.innerHTML;
-
-}
-
-
-/* =================================================
-   UPDATE DATA DIAGRAM
-================================================= */
-
-function updateChart(tahun){
-
-    const data =
-        statistikTahun[tahun];
-
-    const dataDitambahkan = [];
-
-    const dataTerjual = [];
-
-
-    for(let bulan = 1; bulan <= 12; bulan++){
-
-        if(data && data[bulan]){
-
-            dataDitambahkan.push(
-                Number(data[bulan].hewan) || 0
-            );
-
-            dataTerjual.push(
-                Number(data[bulan].terjual) || 0
-            );
-
-        }else{
-
-            dataDitambahkan.push(0);
-
-            dataTerjual.push(0);
-
-        }
-
-    }
-
-
-    perkembanganChart.data.labels =
-        labelsBulan;
-
-    perkembanganChart.data.datasets[0].data =
-        dataDitambahkan;
-
-    perkembanganChart.data.datasets[1].data =
-        dataTerjual;
-
-
-    perkembanganChart.update();
-
-        /* ==========================================
+                    /* ==========================================
        UPDATE DIAGRAM KEUANGAN
     ========================================== */
 
-    const dataKeuangan =
-        keuanganTahun[tahun];
+                    const dataKeuangan =
+                        keuanganTahun[tahun];
 
-    const dataProfit = [];
+                    const dataProfit = [];
 
-    const dataPengeluaran = [];
+                    const dataPengeluaran = [];
 
 
-    for(
-        let bulan = 1;
-        bulan <= 12;
-        bulan++
-    ){
+                    for (
+                        let bulan = 1; bulan <= 12; bulan++
+                    ) {
 
-        if(
-            dataKeuangan &&
-            dataKeuangan[bulan]
-        ){
+                        if (
+                            dataKeuangan &&
+                            dataKeuangan[bulan]
+                        ) {
 
-            dataProfit.push(
-                Number(
-                    dataKeuangan[bulan].profit
-                ) || 0
-            );
+                            dataProfit.push(
+                                Number(
+                                    dataKeuangan[bulan].profit
+                                ) || 0
+                            );
 
-            dataPengeluaran.push(
-                Number(
-                    dataKeuangan[bulan].pengeluaran
-                ) || 0
-            );
+                            dataPengeluaran.push(
+                                Number(
+                                    dataKeuangan[bulan].pengeluaran
+                                ) || 0
+                            );
 
-        }else{
+                        } else {
 
-            dataProfit.push(0);
+                            dataProfit.push(0);
 
-            dataPengeluaran.push(0);
+                            dataPengeluaran.push(0);
 
-        }
+                        }
 
-    }
+                    }
 
 
-    keuanganChart.data.labels =
-        labelsBulan;
+                    keuanganChart.data.labels =
+                        labelsBulan;
 
-    keuanganChart.data.datasets[0].data =
-        dataProfit;
+                    keuanganChart.data.datasets[0].data =
+                        dataProfit;
 
-    keuanganChart.data.datasets[1].data =
-        dataPengeluaran;
+                    keuanganChart.data.datasets[1].data =
+                        dataPengeluaran;
 
 
-    keuanganChart.update();
+                    keuanganChart.update();
 
 
-    /* Rekam jejak mengikuti tahun */
+                    /* Rekam jejak mengikuti tahun */
 
-    renderRekamJejak(tahun);
+                    renderRekamJejak(tahun);
 
-}
+                }
 
 
-/* =================================================
-   REKAM JEJAK BERDASARKAN PERIODE / BULAN
-================================================= */
+                /* =================================================
+                   REKAM JEJAK BERDASARKAN PERIODE / BULAN
+                ================================================= */
 
-function renderRekamJejak(tahun){
+                function renderRekamJejak(tahun) {
 
-    const tbody =
-        document.getElementById(
-            'rekamJejakBody'
-        );
+                    const tbody =
+                        document.getElementById(
+                            'rekamJejakBody'
+                        );
 
-    const kosong =
-        document.getElementById(
-            'rekamKosong'
-        );
+                    const kosong =
+                        document.getElementById(
+                            'rekamKosong'
+                        );
 
 
-    if(!tbody || !kosong){
+                    if (!tbody || !kosong) {
 
-        return;
+                        return;
 
-    }
+                    }
 
 
-    tbody.innerHTML = '';
+                    tbody.innerHTML = '';
 
-    let adaData = false;
+                    let adaData = false;
 
 
-    /*
-     * Menyimpan aktivitas berdasarkan bulan
-     *
-     * Contoh:
-     * 2026-08
-     */
+                    /*
+                     * Menyimpan aktivitas berdasarkan bulan
+                     *
+                     * Contoh:
+                     * 2026-08
+                     */
 
-    const periode = {};
+                    const periode = {};
 
 
-    Object.keys(detailStatistik)
-        .sort()
-        .forEach(function(tanggal){
+                    Object.keys(detailStatistik)
+                        .sort()
+                        .forEach(function(tanggal) {
 
-            /*
-             * Ambil tahun
-             */
+                            /*
+                             * Ambil tahun
+                             */
 
-            if(
-                tanggal.substring(0,4)
-                !== String(tahun)
-            ){
+                            if (
+                                tanggal.substring(0, 4) !==
+                                String(tahun)
+                            ) {
 
-                return;
+                                return;
 
-            }
+                            }
 
 
-            const data =
-                detailStatistik[tanggal];
+                            const data =
+                                detailStatistik[tanggal];
 
 
-            const jumlahAktivitas =
-                data.hewan.length +
-                data.pengeluaran.length +
-                data.terjual.length;
+                            const jumlahAktivitas =
+                                data.hewan.length +
+                                data.pengeluaran.length +
+                                data.terjual.length;
 
 
-            if(jumlahAktivitas === 0){
+                            if (jumlahAktivitas === 0) {
 
-                return;
+                                return;
 
-            }
+                            }
 
 
-            /*
-             * Ambil bulan
-             */
+                            /*
+                             * Ambil bulan
+                             */
 
-            const tanggalObj =
-                new Date(
-                    tanggal + 'T00:00:00'
-                );
+                            const tanggalObj =
+                                new Date(
+                                    tanggal + 'T00:00:00'
+                                );
 
 
-            const bulan =
-                tanggalObj.getMonth() + 1;
+                            const bulan =
+                                tanggalObj.getMonth() + 1;
 
 
-            const key =
-                String(tahun) +
-                '-' +
-                String(bulan).padStart(2,'0');
+                            const key =
+                                String(tahun) +
+                                '-' +
+                                String(bulan).padStart(2, '0');
 
 
-            /*
-             * Buat periode jika belum ada
-             */
+                            /*
+                             * Buat periode jika belum ada
+                             */
 
-            if(!periode[key]){
+                            if (!periode[key]) {
 
-                periode[key] = {
+                                periode[key] = {
 
-                    tahun: tahun,
+                                    tahun: tahun,
 
-                    bulan: bulan,
+                                    bulan: bulan,
 
-                    tanggal: [],
+                                    tanggal: [],
 
-                    hewan: 0,
+                                    hewan: 0,
 
-                    pengeluaran: 0,
+                                    pengeluaran: 0,
 
-                    terjual: 0
+                                    terjual: 0
 
-                };
+                                };
 
-            }
+                            }
 
 
-            /*
-             * Simpan tanggal
-             */
+                            /*
+                             * Simpan tanggal
+                             */
 
-            periode[key].tanggal.push(
-                tanggal
-            );
+                            periode[key].tanggal.push(
+                                tanggal
+                            );
 
 
-            /*
-             * Hitung aktivitas
-             */
+                            /*
+                             * Hitung aktivitas
+                             */
 
-            periode[key].hewan +=
-                data.hewan.length;
+                            periode[key].hewan +=
+                                data.hewan.length;
 
 
-            periode[key].pengeluaran +=
-                data.pengeluaran.length;
+                            periode[key].pengeluaran +=
+                                data.pengeluaran.length;
 
 
-            periode[key].terjual +=
-                data.terjual.length;
+                            periode[key].terjual +=
+                                data.terjual.length;
 
-        });
+                        });
 
 
-    /*
-     * Urutkan periode terbaru
-     */
+                    /*
+                     * Urutkan periode terbaru
+                     */
 
-    const periodeKeys =
-        Object.keys(periode)
-            .sort()
-            .reverse();
+                    const periodeKeys =
+                        Object.keys(periode)
+                        .sort()
+                        .reverse();
 
 
-    /*
-     * Tampilkan periode
-     */
+                    /*
+                     * Tampilkan periode
+                     */
 
-    periodeKeys.forEach(function(key){
+                    periodeKeys.forEach(function(key) {
 
-        const item =
-            periode[key];
+                        const item =
+                            periode[key];
 
 
-        adaData = true;
+                        adaData = true;
 
 
-        const namaBulan =
-            labelsBulan[
-                item.bulan - 1
-            ];
+                        const namaBulan =
+                            labelsBulan[
+                                item.bulan - 1
+                            ];
 
 
-        /*
-         * Total aktivitas
-         */
+                        /*
+                         * Total aktivitas
+                         */
 
-        const totalAktivitas =
-            item.hewan +
-            item.pengeluaran +
-            item.terjual;
+                        const totalAktivitas =
+                            item.hewan +
+                            item.pengeluaran +
+                            item.terjual;
 
 
-        /*
-         * Ringkasan
-         */
+                        /*
+                         * Ringkasan
+                         */
 
-        let ringkasan = [];
+                        let ringkasan = [];
 
 
-        if(item.hewan > 0){
+                        if (item.hewan > 0) {
 
-            ringkasan.push(
-                item.hewan +
-                ' hewan ditambahkan'
-            );
+                            ringkasan.push(
+                                item.hewan +
+                                ' hewan ditambahkan'
+                            );
 
-        }
+                        }
 
 
-        if(item.pengeluaran > 0){
+                        if (item.pengeluaran > 0) {
 
-            ringkasan.push(
-                item.pengeluaran +
-                ' pengeluaran'
-            );
+                            ringkasan.push(
+                                item.pengeluaran +
+                                ' pengeluaran'
+                            );
 
-        }
+                        }
 
 
-        if(item.terjual > 0){
+                        if (item.terjual > 0) {
 
-            ringkasan.push(
-                item.terjual +
-                ' hewan terjual'
-            );
+                            ringkasan.push(
+                                item.terjual +
+                                ' hewan terjual'
+                            );
 
-        }
+                        }
 
 
-        /*
-         * Tombol Lihat
-         */
+                        /*
+                         * Tombol Lihat
+                         */
 
-        const row =
-            document.createElement('tr');
+                        const row =
+                            document.createElement('tr');
 
 
-        row.innerHTML = `
+                        row.innerHTML = `
 
             <td>
 
@@ -2886,178 +2822,177 @@ function renderRekamJejak(tahun){
         `;
 
 
-        tbody.appendChild(row);
+                        tbody.appendChild(row);
 
-    });
-
-
-    /*
-     * Jika tidak ada data
-     */
-
-    if(adaData){
-
-        kosong.style.display = 'none';
-
-    }else{
-
-        kosong.style.display = 'block';
-
-    }
-
-}
-
-/* =================================================
-   LIHAT DETAIL PERIODE
-================================================= */
-
-function lihatPeriode(key){
-
-    /*
-     * key contoh:
-     * 2026-08
-     */
-
-    const bagian =
-        key.split('-');
+                    });
 
 
-    const tahun =
-        bagian[0];
+                    /*
+                     * Jika tidak ada data
+                     */
 
+                    if (adaData) {
 
-    const bulan =
-        Number(bagian[1]);
+                        kosong.style.display = 'none';
 
+                    } else {
 
-    const namaBulan =
-        labelsBulan[bulan - 1];
+                        kosong.style.display = 'block';
 
-
-    /*
-     * Cari semua tanggal
-     * pada periode tersebut
-     */
-
-    const tanggalPeriode =
-        Object.keys(detailStatistik)
-            .filter(function(tanggal){
-
-                return (
-                    tanggal.substring(0,7)
-                    === key
-                );
-
-            })
-            .sort()
-            .reverse();
-
-
-    if(tanggalPeriode.length === 0){
-
-        alert(
-            'Tidak ada aktivitas pada periode ini.'
-        );
-
-        return;
-
-    }
-
-
-    /*
-     * Isi modal
-     */
-
-    document.getElementById(
-        'detailModalTanggal'
-    ).innerHTML =
-        '📅 ' +
-        namaBulan +
-        ' ' +
-        tahun;
-
-
-    document.getElementById(
-        'detailModalSubjudul'
-    ).innerHTML =
-        tanggalPeriode.length +
-        ' hari memiliki aktivitas';
-
-
-    let html = '';
-
-
-    /*
-     * Tampilkan tanggal
-     */
-
-    tanggalPeriode.forEach(
-        function(tanggal){
-
-            const data =
-                detailStatistik[tanggal];
-
-
-            const tanggalObj =
-                new Date(
-                    tanggal + 'T00:00:00'
-                );
-
-
-            const tanggalTampil =
-                tanggalObj.toLocaleDateString(
-                    'id-ID',
-                    {
-                        day:'numeric',
-                        month:'long',
-                        year:'numeric'
                     }
-                );
+
+                }
+
+                /* =================================================
+                   LIHAT DETAIL PERIODE
+                ================================================= */
+
+                function lihatPeriode(key) {
+
+                    /*
+                     * key contoh:
+                     * 2026-08
+                     */
+
+                    const bagian =
+                        key.split('-');
 
 
-            const jumlahAktivitas =
-                data.hewan.length +
-                data.pengeluaran.length +
-                data.terjual.length;
+                    const tahun =
+                        bagian[0];
 
 
-            let aktivitas = [];
+                    const bulan =
+                        Number(bagian[1]);
 
 
-            if(data.hewan.length > 0){
-
-                aktivitas.push(
-                    '🐄 ' +
-                    data.hewan.length +
-                    ' hewan ditambahkan'
-                );
-
-            }
+                    const namaBulan =
+                        labelsBulan[bulan - 1];
 
 
-            if(data.pengeluaran.length > 0){
+                    /*
+                     * Cari semua tanggal
+                     * pada periode tersebut
+                     */
 
-                aktivitas.push(
-                    '💰 ' +
-                    data.pengeluaran.length +
-                    ' pengeluaran'
-                );
+                    const tanggalPeriode =
+                        Object.keys(detailStatistik)
+                        .filter(function(tanggal) {
 
-            }
+                            return (
+                                tanggal.substring(0, 7) ===
+                                key
+                            );
 
-
-            if(data.terjual.length > 0){
-
-                aktivitas.push(
-                    '🛒 ' +
-                    data.terjual.length +
-                    ' hewan terjual'
-                );
-
-            }
+                        })
+                        .sort()
+                        .reverse();
 
 
-            html += `
+                    if (tanggalPeriode.length === 0) {
+
+                        alert(
+                            'Tidak ada aktivitas pada periode ini.'
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * Isi modal
+                     */
+
+                    document.getElementById(
+                            'detailModalTanggal'
+                        ).innerHTML =
+                        '📅 ' +
+                        namaBulan +
+                        ' ' +
+                        tahun;
+
+
+                    document.getElementById(
+                            'detailModalSubjudul'
+                        ).innerHTML =
+                        tanggalPeriode.length +
+                        ' hari memiliki aktivitas';
+
+
+                    let html = '';
+
+
+                    /*
+                     * Tampilkan tanggal
+                     */
+
+                    tanggalPeriode.forEach(
+                        function(tanggal) {
+
+                            const data =
+                                detailStatistik[tanggal];
+
+
+                            const tanggalObj =
+                                new Date(
+                                    tanggal + 'T00:00:00'
+                                );
+
+
+                            const tanggalTampil =
+                                tanggalObj.toLocaleDateString(
+                                    'id-ID', {
+                                        day: 'numeric',
+                                        month: 'long',
+                                        year: 'numeric'
+                                    }
+                                );
+
+
+                            const jumlahAktivitas =
+                                data.hewan.length +
+                                data.pengeluaran.length +
+                                data.terjual.length;
+
+
+                            let aktivitas = [];
+
+
+                            if (data.hewan.length > 0) {
+
+                                aktivitas.push(
+                                    '🐄 ' +
+                                    data.hewan.length +
+                                    ' hewan ditambahkan'
+                                );
+
+                            }
+
+
+                            if (data.pengeluaran.length > 0) {
+
+                                aktivitas.push(
+                                    '💰 ' +
+                                    data.pengeluaran.length +
+                                    ' pengeluaran'
+                                );
+
+                            }
+
+
+                            if (data.terjual.length > 0) {
+
+                                aktivitas.push(
+                                    '🛒 ' +
+                                    data.terjual.length +
+                                    ' hewan terjual'
+                                );
+
+                            }
+
+
+                            html += `
 
                 <tr>
 
@@ -3099,26 +3034,26 @@ function lihatPeriode(key){
 
             `;
 
-        }
-    );
+                        }
+                    );
 
 
-    /*
-     * Karena tabel modal lama punya
-     * 5 kolom, kita ubah header sementara
-     */
+                    /*
+                     * Karena tabel modal lama punya
+                     * 5 kolom, kita ubah header sementara
+                     */
 
-    const modalTable =
-        document.querySelector(
-            '#detailAktivitasModal .detail-table'
-        );
+                    const modalTable =
+                        document.querySelector(
+                            '#detailAktivitasModal .detail-table'
+                        );
 
 
-    if(modalTable){
+                    if (modalTable) {
 
-        modalTable.querySelector(
-            'thead'
-        ).innerHTML = `
+                        modalTable.querySelector(
+                            'thead'
+                        ).innerHTML = `
 
             <tr>
 
@@ -3132,62 +3067,62 @@ function lihatPeriode(key){
 
         `;
 
-    }
+                    }
 
 
-    document.getElementById(
-        'detailModalBody'
-    ).innerHTML =
-        html;
+                    document.getElementById(
+                            'detailModalBody'
+                        ).innerHTML =
+                        html;
 
 
-    /*
-     * Sesuaikan colspan kosong
-     */
+                    /*
+                     * Sesuaikan colspan kosong
+                     */
 
-    document.getElementById(
-        'detailAktivitasModal'
-    ).classList.add('show');
+                    document.getElementById(
+                        'detailAktivitasModal'
+                    ).classList.add('show');
 
-}
-
-
-/* =================================================
-   TAMPILKAN DETAIL REKAM JEJAK
-================================================= */
-
-function tampilkanDetail(tanggal){
-
-    const data =
-        detailStatistik[tanggal];
+                }
 
 
-    if(!data){
+                /* =================================================
+                   TAMPILKAN DETAIL REKAM JEJAK
+                ================================================= */
 
-        alert(
-            'Detail aktivitas tidak ditemukan.'
-        );
+                function tampilkanDetail(tanggal) {
 
-        return;
-
-    }
-
-    /*
- * Kembalikan header modal
- * menjadi header detail aktivitas
- */
-
-const modalTable =
-    document.querySelector(
-        '#detailAktivitasModal .detail-table'
-    );
+                    const data =
+                        detailStatistik[tanggal];
 
 
-if(modalTable){
+                    if (!data) {
 
-    modalTable.querySelector(
-        'thead'
-    ).innerHTML = `
+                        alert(
+                            'Detail aktivitas tidak ditemukan.'
+                        );
+
+                        return;
+
+                    }
+
+                    /*
+                     * Kembalikan header modal
+                     * menjadi header detail aktivitas
+                     */
+
+                    const modalTable =
+                        document.querySelector(
+                            '#detailAktivitasModal .detail-table'
+                        );
+
+
+                    if (modalTable) {
+
+                        modalTable.querySelector(
+                            'thead'
+                        ).innerHTML = `
 
         <tr>
 
@@ -3201,55 +3136,54 @@ if(modalTable){
 
     `;
 
-}
+                    }
 
-    const tanggalObj =
-        new Date(
-            tanggal + 'T00:00:00'
-        );
-
-
-    const tanggalTampil =
-        tanggalObj.toLocaleDateString(
-            'id-ID',
-            {
-                day:'numeric',
-                month:'long',
-                year:'numeric'
-            }
-        );
+                    const tanggalObj =
+                        new Date(
+                            tanggal + 'T00:00:00'
+                        );
 
 
-    document.getElementById(
-        'detailModalTanggal'
-    ).innerHTML =
-        '📋 ' + tanggalTampil;
+                    const tanggalTampil =
+                        tanggalObj.toLocaleDateString(
+                            'id-ID', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric'
+                            }
+                        );
 
 
-    const jumlahAktivitas =
-        data.hewan.length +
-        data.pengeluaran.length +
-        data.terjual.length;
+                    document.getElementById(
+                            'detailModalTanggal'
+                        ).innerHTML =
+                        '📋 ' + tanggalTampil;
 
 
-    document.getElementById(
-        'detailModalSubjudul'
-    ).innerHTML =
-        jumlahAktivitas +
-        ' aktivitas pada tanggal ini';
+                    const jumlahAktivitas =
+                        data.hewan.length +
+                        data.pengeluaran.length +
+                        data.terjual.length;
 
 
-    let html = '';
+                    document.getElementById(
+                            'detailModalSubjudul'
+                        ).innerHTML =
+                        jumlahAktivitas +
+                        ' aktivitas pada tanggal ini';
 
 
-    /* ==========================================
-       HEWAN DITAMBAHKAN
-    ========================================== */
+                    let html = '';
 
-    data.hewan.forEach(
-        function(item){
 
-            html += `
+                    /* ==========================================
+                       HEWAN DITAMBAHKAN
+                    ========================================== */
+
+                    data.hewan.forEach(
+                        function(item) {
+
+                            html += `
 
                 <tr>
 
@@ -3285,18 +3219,18 @@ if(modalTable){
 
             `;
 
-        }
-    );
+                        }
+                    );
 
 
-    /* ==========================================
-       PENGELUARAN
-    ========================================== */
+                    /* ==========================================
+                       PENGELUARAN
+                    ========================================== */
 
-    data.pengeluaran.forEach(
-        function(item){
+                    data.pengeluaran.forEach(
+                        function(item) {
 
-            html += `
+                            html += `
 
                 <tr>
 
@@ -3342,18 +3276,18 @@ if(modalTable){
 
             `;
 
-        }
-    );
+                        }
+                    );
 
 
-    /* ==========================================
-       HEWAN TERJUAL
-    ========================================== */
+                    /* ==========================================
+                       HEWAN TERJUAL
+                    ========================================== */
 
-    data.terjual.forEach(
-        function(item){
+                    data.terjual.forEach(
+                        function(item) {
 
-            html += `
+                            html += `
 
                 <tr>
 
@@ -3422,13 +3356,13 @@ if(modalTable){
 
             `;
 
-        }
-    );
+                        }
+                    );
 
 
-    if(html === ''){
+                    if (html === '') {
 
-        html = `
+                        html = `
 
             <tr>
 
@@ -3446,176 +3380,173 @@ if(modalTable){
 
         `;
 
-    }
+                    }
 
 
-    document.getElementById(
-        'detailModalBody'
-    ).innerHTML =
-        html;
+                    document.getElementById(
+                            'detailModalBody'
+                        ).innerHTML =
+                        html;
 
 
-    document.getElementById(
-        'detailAktivitasModal'
-    ).classList.add('show');
+                    document.getElementById(
+                        'detailAktivitasModal'
+                    ).classList.add('show');
 
-}
-
-
-/* =================================================
-   TUTUP DETAIL
-================================================= */
-
-function tutupDetail(){
-
-    const modal =
-        document.getElementById(
-            'detailAktivitasModal'
-        );
-
-    modal.classList.remove('show');
-
-}
+                }
 
 
-/* =================================================
-   INDIKATOR
-================================================= */
+                /* =================================================
+                   TUTUP DETAIL
+                ================================================= */
 
-const indicatorButtons =
-    document.querySelectorAll(
-        '.indicator-btn'
-    );
+                function tutupDetail() {
+
+                    const modal =
+                        document.getElementById(
+                            'detailAktivitasModal'
+                        );
+
+                    modal.classList.remove('show');
+
+                }
 
 
-indicatorButtons.forEach(
-    function(button){
+                /* =================================================
+                   INDIKATOR
+                ================================================= */
 
-        button.addEventListener(
-            'click',
-            function(){
+                const indicatorButtons =
+                    document.querySelectorAll(
+                        '.indicator-btn'
+                    );
+
 
                 indicatorButtons.forEach(
-                    function(btn){
+                    function(button) {
 
-                        btn.classList.remove(
-                            'active'
+                        button.addEventListener(
+                            'click',
+                            function() {
+
+                                indicatorButtons.forEach(
+                                    function(btn) {
+
+                                        btn.classList.remove(
+                                            'active'
+                                        );
+
+                                    }
+                                );
+
+
+                                this.classList.add(
+                                    'active'
+                                );
+
+
+                                const indicator =
+                                    this.dataset.indicator;
+
+
+                                /* Sembunyikan semua */
+
+                                perkembanganChart.data.datasets
+                                    .forEach(
+                                        function(dataset) {
+
+                                            dataset.hidden = true;
+
+                                        }
+                                    );
+
+
+                                /* Semua */
+
+                                if (
+                                    indicator === 'semua'
+                                ) {
+
+                                    perkembanganChart.data.datasets
+                                        .forEach(
+                                            function(dataset) {
+
+                                                dataset.hidden =
+                                                    false;
+
+                                            }
+                                        );
+
+                                }
+
+
+                                /* Ditambahkan */
+                                else if (
+                                    indicator === 'ditambahkan'
+                                ) {
+
+                                    perkembanganChart
+                                        .data
+                                        .datasets[0]
+                                        .hidden = false;
+
+                                }
+
+
+                                /* Terjual */
+                                else if (
+                                    indicator === 'terjual'
+                                ) {
+
+                                    perkembanganChart
+                                        .data
+                                        .datasets[1]
+                                        .hidden = false;
+
+                                }
+
+
+                                perkembanganChart.update();
+
+                            }
                         );
 
                     }
                 );
 
 
-                this.classList.add(
-                    'active'
-                );
+                /* =================================================
+                   DROPDOWN TAHUN
+                ================================================= */
 
+                document
+                    .getElementById('periodeChart')
+                    .addEventListener(
+                        'change',
+                        function() {
 
-                const indicator =
-                    this.dataset.indicator;
-
-
-                /* Sembunyikan semua */
-
-                perkembanganChart.data.datasets
-                    .forEach(
-                        function(dataset){
-
-                            dataset.hidden = true;
+                            updateChart(
+                                this.value
+                            );
 
                         }
                     );
 
 
-                /* Semua */
+                /* =================================================
+                   LOAD AWAL
+                ================================================= */
 
-                if(
-                    indicator === 'semua'
-                ){
+                if (tahunDefault) {
 
-                    perkembanganChart.data.datasets
-                        .forEach(
-                            function(dataset){
-
-                                dataset.hidden =
-                                    false;
-
-                            }
-                        );
+                    updateChart(
+                        tahunDefault
+                    );
 
                 }
+            </script>
 
-
-                /* Ditambahkan */
-
-                else if(
-                    indicator === 'ditambahkan'
-                ){
-
-                    perkembanganChart
-                        .data
-                        .datasets[0]
-                        .hidden = false;
-
-                }
-
-
-                /* Terjual */
-
-                else if(
-                    indicator === 'terjual'
-                ){
-
-                    perkembanganChart
-                        .data
-                        .datasets[1]
-                        .hidden = false;
-
-                }
-
-
-                perkembanganChart.update();
-
-            }
-        );
-
-    }
-);
-
-
-/* =================================================
-   DROPDOWN TAHUN
-================================================= */
-
-document
-    .getElementById('periodeChart')
-    .addEventListener(
-        'change',
-        function(){
-
-            updateChart(
-                this.value
-            );
-
-        }
-    );
-
-
-/* =================================================
-   LOAD AWAL
-================================================= */
-
-if(tahunDefault){
-
-    updateChart(
-        tahunDefault
-    );
-
-}
-
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 

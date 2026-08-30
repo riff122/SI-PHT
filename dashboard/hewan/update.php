@@ -3,132 +3,100 @@
 session_start();
 include '../../config/koneksi.php';
 
-if(!isset($_SESSION['user'])){
+if (!isset($_SESSION['user'])) {
     header("Location: ../../home.php");
     exit;
 }
 
-$user_id = $_SESSION['user']['id'];
-$id = (int)$_GET['id'];
+$user_id = (int)$_SESSION['user']['id'];
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-if(isset($_POST['update'])){
+if (isset($_POST['update'])) {
 
-    $nama = mysqli_real_escape_string($conn, $_POST['nama_hewan']);
-    $jenis = mysqli_real_escape_string($conn, $_POST['jenis']);
+    $nama = trim($_POST['nama_hewan'] ?? '');
+    $jenis = trim($_POST['jenis'] ?? '');
+    $berat = (float)str_replace(',', '.', $_POST['berat'] ?? '0');
+    $satuan_berat = trim($_POST['satuan_berat'] ?? 'kg');
+    $umur = trim($_POST['umur'] ?? '');
+    $harga = (int)str_replace('.', '', $_POST['harga'] ?? '0');
+    $deskripsi = trim($_POST['deskripsi'] ?? '');
+    $status = trim($_POST['status'] ?? 'Tersedia');
 
-    // BERAT
-    $berat = $_POST['berat'];
-    $satuan_berat = mysqli_real_escape_string(
-        $conn,
-        $_POST['satuan_berat']
-    );
-
-    // UMUR
-    $umur = mysqli_real_escape_string($conn, $_POST['umur']);
-
-    // HARGA
-    // Hilangkan titik sebelum disimpan ke database
-    $harga = str_replace('.', '', $_POST['harga']);
-    $harga = (int)$harga;
-
-    // DESKRIPSI
-    $deskripsi = mysqli_real_escape_string(
-        $conn,
-        $_POST['deskripsi']
-    );
-
-    // STATUS
-    $status = mysqli_real_escape_string(
-        $conn,
-        $_POST['status']
-    );
-
-
-    /* ==========================================
-       TANGGAL TERJUAL
-    ========================================== */
-
-    if($status == 'Terjual'){
-
-        $tanggal_terjual = "NOW()";
-
-    }else{
-
-        $tanggal_terjual = "NULL";
-
+    if ($status === 'Terjual') {
+        $stmt = mysqli_prepare($conn, "
+            UPDATE hewan SET
+                nama_hewan = ?,
+                jenis = ?,
+                berat = ?,
+                satuan_berat = ?,
+                umur = ?,
+                harga = ?,
+                deskripsi = ?,
+                status = ?,
+                tanggal_terjual = COALESCE(tanggal_terjual, NOW()),
+                updated_at = NOW()
+            WHERE id = ? AND user_id = ?
+        ");
+        mysqli_stmt_bind_param(
+            $stmt,
+            "ssdssissii",
+            $nama,
+            $jenis,
+            $berat,
+            $satuan_berat,
+            $umur,
+            $harga,
+            $deskripsi,
+            $status,
+            $id,
+            $user_id
+        );
+    } else {
+        $stmt = mysqli_prepare($conn, "
+            UPDATE hewan SET
+                nama_hewan = ?,
+                jenis = ?,
+                berat = ?,
+                satuan_berat = ?,
+                umur = ?,
+                harga = ?,
+                deskripsi = ?,
+                status = ?,
+                tanggal_terjual = NULL,
+                updated_at = NOW()
+            WHERE id = ? AND user_id = ?
+        ");
+        mysqli_stmt_bind_param(
+            $stmt,
+            "ssdssissii",
+            $nama,
+            $jenis,
+            $berat,
+            $satuan_berat,
+            $umur,
+            $harga,
+            $deskripsi,
+            $status,
+            $id,
+            $user_id
+        );
     }
 
-
-    /* ==========================================
-       UPDATE DATA HEWAN
-    ========================================== */
-
-    $update = mysqli_query($conn,"
-        UPDATE hewan SET
-
-            nama_hewan='$nama',
-
-            jenis='$jenis',
-
-            berat='$berat',
-
-            satuan_berat='$satuan_berat',
-
-            umur='$umur',
-
-            harga='$harga',
-
-            deskripsi='$deskripsi',
-
-            status='$status',
-
-            tanggal_terjual=$tanggal_terjual
-
-        WHERE id='$id'
-
-        AND user_id='$user_id'
-    ");
-
-
-    /* ==========================================
-       HASIL UPDATE
-    ========================================== */
-
-    if($update){
-
-        echo "
-        <script>
-
+    if (mysqli_stmt_execute($stmt)) {
+        echo "<script>
             alert('Data berhasil diupdate');
-
             window.location='index.php';
-
-        </script>
-        ";
-
+        </script>";
         exit;
-
-    }else{
-
-        echo "
-        <script>
-
-            alert('Gagal mengupdate data');
-
+    } else {
+        echo "<script>
+            alert('Gagal mengupdate data: " . addslashes(mysqli_error($conn)) . "');
             history.back();
-
-        </script>
-        ";
-
+        </script>";
         exit;
-
     }
 
-}else{
-
-    header("Location:index.php");
+} else {
+    header("Location: index.php");
     exit;
-
 }
-
-?>
