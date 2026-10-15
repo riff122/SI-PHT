@@ -6,3 +6,5 @@ session_destroy();
 
 header('Location: ../home.php#marketplace');
 exit;
+
+?>

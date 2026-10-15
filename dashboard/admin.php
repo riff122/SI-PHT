@@ -2,12 +2,12 @@
 session_start();
 include '../config/koneksi.php';
 
-if (!isset($_SESSION['user'])) {
-    header('Location: ../home.php');
+if(!isset($_SESSION['user'])){
+    header('Location: ../../home.php');
     exit;
 }
 
-if ($_SESSION['user']['role'] != 'admin') {
+if($_SESSION['user']['role'] != 'admin'){
     header('Location: ../home.php');
     exit;
 }
@@ -31,94 +31,92 @@ $total_hewan = mysqli_fetch_assoc($q);
 // Marketplace
 $status = mysqli_query($conn, "SHOW COLUMNS FROM hewan LIKE 'status'");
 
-if (mysqli_num_rows($status) > 0) {
+if(mysqli_num_rows($status) > 0){
 
     $q = mysqli_query($conn, "SELECT COUNT(*) AS total FROM hewan WHERE status='Tersedia'");
     $total_marketplace = mysqli_fetch_assoc($q);
-} else {
+
+}else{
 
     $q = mysqli_query($conn, "SELECT COUNT(*) AS total FROM hewan");
     $total_marketplace = mysqli_fetch_assoc($q);
+
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - TernakApp</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- PWA Settings -->
-    <link rel="manifest" href="../manifest.json">
-    <meta name="theme-color" content="#198754">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="apple-touch-icon" href="../images/icons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="../images/icons/icon-192.png">
+<title>Dashboard Admin</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../style.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
 
 </head>
 
 <body class="dashboard-admin">
 
-    <div class="sidebar">
+<div class="sidebar">
 
-        <h3>🐄 TernakApp</h3>
+    <h3>🐄 KurbanApp</h3>
 
-        <hr>
+    <hr>
 
-        <a href="admin.php">Dashboard</a>
-        <a href="data_user/index.php">Data User</a>
-        <a href="data_hewan/index.php">Data Hewan</a>
-        <a href="../home.php#marketplace">Marketplace</a>
-        <a href="logout.php">Logout</a>
+<a href="admin.php">Dashboard</a>
 
-    </div>
+<a href="data_user/index.php">Data User</a>
 
-    <div class="content">
+<a href="data_hewan/index.php">Data Hewan</a>
 
-        <h2>Selamat Datang, <?= htmlspecialchars($_SESSION['user']['nama']); ?></h2>
-        <p class="text-muted">Dashboard Administrator</p>
+<a href="../#marketplace">Marketplace</a>
 
-        <div class="row g-4 mt-4">
+<a href="logout.php">Logout</a>
 
-            <div class="col-md-3">
-                <div class="stats-card p-4">
-                    <h5>Total User</h5>
-                    <h1><?= number_format($total_user['total']); ?></h1>
-                </div>
-            </div>
+</div>
 
-            <div class="col-md-3">
-                <div class="stats-card p-4">
-                    <h5>Total Peternak</h5>
-                    <h1><?= number_format($total_peternak['total']); ?></h1>
-                </div>
-            </div>
+<div class="content">
 
-            <div class="col-md-3">
-                <div class="stats-card p-4">
-                    <h5>Total Hewan</h5>
-                    <h1><?= number_format($total_hewan['total']); ?></h1>
-                </div>
-            </div>
+<h2>Selamat Datang, <?= $_SESSION['user']['nama']; ?></h2>
 
-            <div class="col-md-3">
-                <div class="stats-card p-4">
-                    <h5>Marketplace</h5>
-                    <h1><?= number_format($total_marketplace['total']); ?></h1>
-                </div>
-            </div>
+<p>Dashboard Administrator</p>
 
-        </div>
+<div class="row g-4 mt-4">
 
-    </div>
+<div class="col-md-3">
+<div class="stats-card p-4">
+<h5>Total User</h5>
+<h1><?= $total_user['total']; ?></h1>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="stats-card p-4">
+<h5>Total Peternak</h5>
+<h1><?= $total_peternak['total']; ?></h1>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="stats-card p-4">
+<h5>Total Hewan</h5>
+<h1><?= $total_hewan['total']; ?></h1>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="stats-card p-4">
+<h5>Marketplace</h5>
+<h1><?= $total_marketplace['total']; ?></h1>
+</div>
+</div>
+
+</div>
+
+</div>
 
 </body>
-
 </html>

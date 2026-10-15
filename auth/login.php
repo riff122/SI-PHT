@@ -7,92 +7,127 @@ ini_set('display_errors', 1);
 
 include '../config/koneksi.php';
 
-if (isset($_POST['login'])) {
+if(isset($_POST['login'])){
 
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $email = htmlspecialchars($_POST['email']);
+    $password = $_POST['password'];
 
-    if (empty($email) || empty($password)) {
-        echo "<script>
-            alert('Email dan password wajib diisi!');
-            window.location='../home.php';
-        </script>";
-        exit;
-    }
-
-    $stmt = mysqli_prepare($conn, "SELECT * FROM users WHERE email = ?");
-    mysqli_stmt_bind_param($stmt, "s", $email);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
+    $query = mysqli_query($conn,
+    "SELECT * FROM users WHERE email='$email'");
 
     // cek email
-    if ($data = mysqli_fetch_assoc($result)) {
+    if(mysqli_num_rows($query) > 0){
+
+        $data = mysqli_fetch_assoc($query);
 
         // cek password
-        if (password_verify($password, $data['password'])) {
+        if(password_verify($password, $data['password'])){
 
-            // cek akun tidak aktif otomatis 6 bulan
-            if ($data['last_login'] != null) {
-                $cek_tanggal = strtotime($data['last_login']);
-                $sekarang = time();
-                $selisih = $sekarang - $cek_tanggal;
 
-                // 6 bulan (180 hari)
-                if ($selisih > (180 * 24 * 60 * 60)) {
-                    $stmtDeact = mysqli_prepare($conn, "UPDATE users SET status='tidak_aktif' WHERE id = ?");
-                    mysqli_stmt_bind_param($stmtDeact, "i", $data['id']);
-                    mysqli_stmt_execute($stmtDeact);
+    // cek akun tidak aktif otomatis 6 bulan
 
-                    echo "<script>
-                        alert('Akun tidak aktif karena lama tidak digunakan. Silakan hubungi admin.');
-                        window.location='../home.php';
-                    </script>";
-                    exit;
-                }
-            }
+    if($data['last_login'] != null){
 
-            // cek status akun
-            if ($data['status'] == 'tidak_aktif') {
-                echo "<script>
-                    alert('Akun tidak aktif. Silakan hubungi admin.');
-                    window.location='../home.php';
-                </script>";
-                exit;
-            }
+        $cek_tanggal = strtotime($data['last_login']);
+        $sekarang = time();
 
-            // Update last login
-            $stmtLast = mysqli_prepare($conn, "UPDATE users SET last_login = NOW() WHERE id = ?");
-            mysqli_stmt_bind_param($stmtLast, "i", $data['id']);
-            mysqli_stmt_execute($stmtLast);
+        $selisih = $sekarang - $cek_tanggal;
+
+
+        // 6 bulan (180 hari)
+        if($selisih > (180 * 24 * 60 * 60)){
+
+
+            mysqli_query($conn,
+            "UPDATE users SET status='tidak_aktif'
+            WHERE id='$data[id]'");
+
+
+            echo "
+            <script>
+            alert('Akun tidak aktif karena lama tidak digunakan. Silahkan hubungi admin.');
+            window.location='../home.php';
+            </script>";
+
+            exit;
+
+        }
+
+    }
+
+
+
+    // cek status akun
+
+    if($data['status']=='tidak_aktif'){
+
+
+        echo "
+        <script>
+        alert('Akun tidak aktif. Silahkan hubungi admin.');
+        window.location='../home.php';
+        </script>";
+
+
+        exit;
+
+    }
+
+        mysqli_query($conn,
+
+        "UPDATE users 
+            SET last_login=NOW()
+            WHERE id='$data[id]'"
+
+);
+
 
             $_SESSION['user'] = [
-                'id' => $data['id'],
-                'nama' => $data['nama'],
-                'role' => $data['role']
-            ];
+    'id' => $data['id'],
+    'nama' => $data['nama'],
+    'role' => $data['role']
+];
+            
 
             // redirect role
-            if ($data['role'] == 'admin') {
+            if($data['role'] == 'admin'){
+
                 header("Location: ../dashboard/admin.php");
-            } else {
+
+            }else{
+
                 header("Location: ../dashboard/user.php");
             }
+
             exit;
-        } else {
-            echo "<script>
+
+            }else{
+
+            echo "
+            <script>
                 alert('Password salah!');
                 window.location='../home.php';
-            </script>";
+            </script>
+            ";
+
             exit;
         }
-    } else {
-        echo "<script>
+
+    }else{
+
+        echo "
+        <script>
             alert('Email tidak ditemukan!');
             window.location='../home.php';
-        </script>";
+        </script>
+        ";
+
         exit;
     }
-} else {
-    header("Location: ../home.php");
-    exit;
+
+}else{
+
+    echo "Tombol login tidak terbaca";
+
 }
+?>

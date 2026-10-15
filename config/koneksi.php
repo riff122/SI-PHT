@@ -1,14 +1,14 @@
 <?php
 
-$host = getenv('DB_HOST') ?: 'localhost';
-$user = getenv('DB_USER') ?: 'root';
-$pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
-$db   = getenv('DB_NAME') ?: 'ternakapp';
+$host = "sql101.infinityfree.com";
+$user = "if0_42838357";
+$pass = "dSZN2h4pi4Fjv";
+$db = "if0_42838357_ternakkk";
 
-mysqli_report(MYSQLI_REPORT_OFF);
-$conn = @mysqli_connect($host, $user, $pass, $db);
+$conn = mysqli_connect($host, $user, $pass, $db);
 
-$db_connected = ($conn !== false);
-$db_error_message = $db_connected ? '' : mysqli_connect_error();
+if (!$conn) {
+    die("Koneksi gagal: " . mysqli_connect_error());
+}
 
-
+?>

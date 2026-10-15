@@ -4,40 +4,55 @@ session_start();
 
 include '../../config/koneksi.php';
 
-if (!isset($_SESSION['user'])) {
-    header("Location: ../../home.php");
+if(!isset($_SESSION['user'])){
+
+    header("Location: ../home.php");
     exit;
 }
 
-$user_id = (int)$_SESSION['user']['id'];
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$user_id = $_SESSION['user']['id'];
 
-$stmt = mysqli_prepare($conn, "SELECT id FROM pengeluaran WHERE id = ? AND user_id = ?");
-mysqli_stmt_bind_param($stmt, "ii", $id, $user_id);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$data = mysqli_fetch_assoc($result);
+$id = $_GET['id'];
 
-if (!$data) {
-    echo "<script>
-        alert('Data pengeluaran tidak ditemukan atau Anda tidak memiliki akses.');
+$query = mysqli_query($conn,
+"SELECT * FROM pengeluaran
+WHERE id='$id'
+AND user_id='$user_id'");
+
+$data = mysqli_fetch_assoc($query);
+
+if(!$data){
+
+    echo "
+    <script>
+        alert('Data tidak ditemukan');
         window.location='index.php';
-    </script>";
+    </script>
+    ";
+
     exit;
 }
 
-$stmtDel = mysqli_prepare($conn, "DELETE FROM pengeluaran WHERE id = ? AND user_id = ?");
-mysqli_stmt_bind_param($stmtDel, "ii", $id, $user_id);
-$hapus = mysqli_stmt_execute($stmtDel);
+$hapus = mysqli_query($conn,
+"DELETE FROM pengeluaran
+WHERE id='$id'");
 
-if ($hapus) {
-    echo "<script>
-        alert('Data pengeluaran berhasil dihapus');
+if($hapus){
+
+    echo "
+    <script>
+        alert('Data berhasil dihapus');
         window.location='index.php';
-    </script>";
-} else {
-    echo "<script>
-        alert('Gagal menghapus data: " . addslashes(mysqli_error($conn)) . "');
+    </script>
+    ";
+
+}else{
+
+    echo "
+    <script>
+        alert('Gagal menghapus data');
         window.location='index.php';
-    </script>";
+    </script>
+    ";
 }
+?>

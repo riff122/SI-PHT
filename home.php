@@ -5,34 +5,38 @@ session_start();
 include 'config/koneksi.php';
 
 
-$jumlahHewan = 0;
-$jumlahPeternak = 0;
-$jumlahDesa = 0;
+// TOTAL HEWAN
+$totalHewan = mysqli_query($conn,"
+SELECT COUNT(*) as total 
+FROM hewan
+");
 
-if ($conn) {
-    // TOTAL HEWAN
-    $totalHewan = mysqli_query($conn, "SELECT COUNT(*) as total FROM hewan WHERE status_arsip = 0");
-    if ($totalHewan) {
-        $jumlahHewan = (int)(mysqli_fetch_assoc($totalHewan)['total'] ?? 0);
-    }
+$jumlahHewan = mysqli_fetch_assoc($totalHewan)['total'];
 
-    // TOTAL PETERNAK
-    $totalPeternak = mysqli_query($conn, "SELECT COUNT(*) as total FROM users WHERE role='peternak'");
-    if ($totalPeternak) {
-        $jumlahPeternak = (int)(mysqli_fetch_assoc($totalPeternak)['total'] ?? 0);
-    }
 
-    // TOTAL DESA
-    $totalDesa = mysqli_query($conn, "SELECT COUNT(DISTINCT desa) as total FROM users WHERE role='peternak'");
-    if ($totalDesa) {
-        $jumlahDesa = (int)(mysqli_fetch_assoc($totalDesa)['total'] ?? 0);
-    }
-}
+// TOTAL PETERNAK
+$totalPeternak = mysqli_query($conn,"
+SELECT COUNT(*) as total 
+FROM users
+WHERE role='peternak'
+");
+
+$jumlahPeternak = mysqli_fetch_assoc($totalPeternak)['total'];
+
+
+// TOTAL DESA
+$totalDesa = mysqli_query($conn,"
+SELECT COUNT(DISTINCT alamat) as total
+FROM users
+WHERE role='peternak'
+");
+
+$jumlahDesa = mysqli_fetch_assoc($totalDesa)['total'];
+
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,1237 +53,1294 @@ if ($conn) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- PWA Settings -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#198754">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="TernakApp">
-    <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="images/icons/icon-192.png">
-
     <!-- style -->
     <link rel="stylesheet" href="style.css">
 
 </head>
-
 <body>
 
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg fixed-top">
-        <div class="container">
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
 
-            <a class="navbar-brand" href="#">
-                🐄TernakApp
-            </a>
+        <a class="navbar-brand" href="#">
+         🐄TernakApp
+        </a>
 
-            <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+        <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-lg-center">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#home">Home</a>
-                    </li>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="#home">Home</a>
+                </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="#tentang">Tentang</a>
-                    </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#tentang">Tentang</a>
+                </li>
 
-                    <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
-
-
-                        <?php if (isset($_SESSION['user'])) { ?>
-
-                            <?php if ($_SESSION['user']['role'] == 'admin') { ?>
-                                <a href="dashboard/admin.php" class="btn btn-success">
-                                    Dashboard Admin
-                                </a>
-                            <?php } ?>
-
-                            <?php if ($_SESSION['user']['role'] == 'peternak') { ?>
-                                <a href="dashboard/user.php" class="btn btn-success">
-                                    Dashboard Peternak
-                                </a>
-                            <?php } ?>
+                <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
 
 
-                        <?php } else { ?>
+    <?php if(isset($_SESSION['user'])) { ?>
 
-                            <!-- hanya muncul kalau BELUM login -->
-                            <button class="btn-login"
-                                data-bs-toggle="modal"
-                                data-bs-target="#authModal">
-                                Login
-                            </button>
+    <?php if($_SESSION['user']['role'] == 'admin') { ?>
+        <a href="dashboard/admin.php" class="btn btn-success">
+            Dashboard Admin
+        </a>
+    <?php } ?>
 
-                        <?php } ?>
-                    </li>
+    <?php if($_SESSION['user']['role'] == 'peternak') { ?>
+        <a href="dashboard/user.php" class="btn btn-success">
+            Dashboard Peternak
+        </a>
+    <?php } ?>
 
-                    <li class="nav-item ms-lg-2 mt-3 mt-lg-0" id="pwaInstallNav" style="display: none;">
-                        <button id="pwaInstallBtn" class="btn btn-outline-success d-flex align-items-center gap-1">
-                            <i class="bi bi-download"></i> Install App
-                        </button>
-                    </li>
-                </ul>
-            </div>
 
-        </div>
-    </nav>
+<?php } else { ?>
 
-    <!-- HERO -->
-    <section class="hero" id="home">
-        <div class="hero-glow"></div>
-        <div class="container">
+    <!-- hanya muncul kalau BELUM login -->
+    <button class="btn-login"
+        data-bs-toggle="modal"
+        data-bs-target="#authModal">
+        Login
+    </button>
 
-            <div class="row align-items-center">
+<?php } ?>
 
-                <div class="col-lg-7">
-
-                    <span class="hero-eyebrow"><i class="bi bi-award"></i> Peternak Terpercaya &middot; Klaten</span>
-
-                    <h1 class="hero-title">
-                        Temukan Hewan Ternak Langsung Dari Peternak
-                    </h1>
-
-                    <p class="hero-subtitle">
-                        Tanpa perantara &middot; Harga transparan &middot; Langsung chat WhatsApp
-                    </p>
-
-                    <div class="mt-4 d-flex flex-wrap gap-3">
-                        <a href="home.php#marketplace" class="btn btn-green">
-                            Lihat Marketplace
-                        </a>
-
-                        <a href="home.php#feature" class="btn btn-outline-custom">
-                            Fitur Peternak
-                        </a>
-                    </div>
-
-                </div>
-
-            </div>
-
+                </li>
+            </ul>
         </div>
 
-        </div>
-    </section>
+    </div>
+</nav>
 
-    <!-- MARKETPLACE -->
-    <section class="py-5" id="marketplace">
+<!-- HERO -->
+<section class="hero" id="home">
+    <div class="hero-glow"></div>
+    <div class="container">
 
-        <div class="container py-5">
+        <div class="row align-items-center">
 
-            <div class="text-center mb-5">
-                <span class="section-eyebrow">Koleksi Pilihan</span>
-                <h2 class="section-title">Marketplace Hewan</h2>
-                <p class="section-subtitle">
-                    Pilih hewan Ternak terbaik langsung dari peternak terpercaya
+            <div class="col-lg-7">
+
+                <span class="hero-eyebrow"><i class="bi bi-award"></i> Peternak Terpercaya &middot; Klaten</span>
+
+                <h1 class="hero-title">
+                    Temukan Hewan Ternak Langsung Dari Peternak
+                </h1>
+
+                <p class="hero-subtitle">
+                    Tanpa perantara &middot; Harga transparan &middot; Langsung chat WhatsApp
                 </p>
 
-                <!-- SEARCH -->
-                <div class="search-box shadow-lg">
-
-
-                    <form method="GET" action="home.php#marketplace" id="filterForm">
-
-                        <div class="row g-2 align-items-center justify-content-center">
-
-                            <!-- Desa -->
-                            <div class="col-xl col-lg-2 col-md-4">
-
-                                <select name="lokasi" id="lokasi" class="form-select live-filter">
-
-                                    <option value="">Semua Dusun</option>
-
-                                    <?php
-                                    $desa = [
-                                        "Tasikmadu",
-                                        "Keputran",
-                                        "Kembang",
-                                        "Kalikajar",
-                                        "Mancasan",
-                                        "Karang Kembang",
-                                        "Karang Soko",
-                                        "Tegalsoko",
-                                        "Tegal Serut",
-                                        "Banjaran",
-                                        "Gatak",
-                                        "Papringan",
-                                        "Badran",
-                                        "Santan",
-                                        "Kadipolo",
-                                        "Ngrendet"
-                                    ];
-
-                                    foreach ($desa as $d) {
-                                        $selected = (isset($_GET['lokasi']) && $_GET['lokasi'] == $d) ? "selected" : "";
-                                        echo "<option value='$d' $selected>$d</option>";
-                                    }
-                                    ?>
-
-                                </select>
-
-                            </div>
-
-                            <!-- Hewan -->
-                            <div class="col-xl col-lg-2 col-md-4">
-
-                                <select id="hewan" name="hewan" class="form-select live-filter">
-
-                                    <option value="">Pilih Hewan</option>
-                                    <option value="Sapi" <?= (isset($_GET['hewan']) && $_GET['hewan'] === 'Sapi') ? 'selected' : ''; ?>>Sapi</option>
-                                    <option value="Kambing" <?= (isset($_GET['hewan']) && $_GET['hewan'] === 'Kambing') ? 'selected' : ''; ?>>Kambing</option>
-                                    <option value="Domba" <?= (isset($_GET['hewan']) && $_GET['hewan'] === 'Domba') ? 'selected' : ''; ?>>Domba</option>
-                                    <option value="Burung" <?= (isset($_GET['hewan']) && $_GET['hewan'] === 'Burung') ? 'selected' : ''; ?>>Burung</option>
-                                    <option value="Ayam" <?= (isset($_GET['hewan']) && $_GET['hewan'] === 'Ayam') ? 'selected' : ''; ?>>Ayam</option>
-
-                                </select>
-
-                            </div>
-
-                            <!-- Ras -->
-                            <div class="col-xl col-lg-2 col-md-4">
-
-                                <select class="form-select live-filter" name="ras" id="ras">
-
-                                    <option value="">Pilih Ras</option>
-                                    <?php if (!empty($_GET['ras'])): ?>
-                                        <option value="<?= htmlspecialchars($_GET['ras']); ?>" selected><?= htmlspecialchars($_GET['ras']); ?></option>
-                                    <?php endif; ?>
-
-                                </select>
-
-                            </div>
-
-                            <div class="col-xl col-lg-2 col-md-4">
-
-                                <select name="peternak" id="peternak" class="form-select live-filter">
-
-                                    <option value="">Semua Peternak</option>
-
-                                    <?php
-                                    if ($conn) {
-                                        $peternak = mysqli_query($conn, "
-                                            SELECT id, nama 
-                                            FROM users
-                                            WHERE role='peternak'
-                                            ORDER BY nama ASC
-                                        ");
-
-                                        if ($peternak) {
-                                            while ($p = mysqli_fetch_assoc($peternak)) {
-                                                $selected = (isset($_GET['peternak']) && (int)$_GET['peternak'] === (int)$p['id']) ? "selected" : "";
-                                                echo "<option value='{$p['id']}' $selected>" . htmlspecialchars($p['nama']) . "</option>";
-                                            }
-                                        }
-                                    }
-                                    ?>
-                                </select>
-
-                            </div>
-
-                            <!-- Tombol Reset / Submit -->
-                            <div class="col-xl col-lg-2 col-md-4 d-flex gap-2">
-
-                                <button type="submit" class="btn btn-green w-100" title="Cari">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                                <button type="button" id="btnResetFilter" class="btn btn-outline-secondary" title="Reset Filter">
-                                    <i class="bi bi-arrow-counterclockwise"></i>
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    </form>
-
-                </div>
-            </div>
-
-            <!-- LOADER -->
-            <div id="marketplaceLoader" class="text-center py-5" style="display: none;">
-                <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;">
-                    <span class="visually-hidden">Memuat data...</span>
-                </div>
-                <p class="text-muted mt-2 fw-semibold">Memuat daftar hewan...</p>
-            </div>
-
-            <!-- CARD GRID (AJAX Content) -->
-            <div class="row g-4" id="marketplaceGrid">
-                <?php include 'ajax_marketplace.php'; ?>
-            </div>
-
-        </div>
-
-    </section>
-
-    </section>
-
-    <!-- FEATURES -->
-    <section class="pb-5" id="feature">
-
-        <div class="container pb-5">
-
-            <div class="text-center mb-5">
-
-                <span class="section-eyebrow">
-                    Keunggulan TernakApp
-                </span>
-
-                <h2 class="section-title">
-                    Solusi Mudah Mengelola dan Menjual Hewan Ternak
-                </h2>
-
-                <p class="section-subtitle">
-                    TernakApp membantu peternak memasarkan hewan kurban,
-                    mengelola data ternak, serta mempertemukan pembeli
-                    langsung dengan peternak terpercaya.
-                </p>
-
-            </div>
-
-
-            <div class="row g-4">
-
-
-                <!-- 1 -->
-                <div class="col-lg-4 col-md-6">
-
-                    <div class="feature-box">
-
-                        <div class="feature-icon mb-4">
-                            <i class="bi bi-whatsapp"></i>
-                        </div>
-
-                        <h4 class="fw-bold">
-                            Chat Langsung
-                        </h4>
-
-                        <p class="text-muted">
-                            Pembeli dapat menghubungi peternak langsung melalui WhatsApp tanpa perantara.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <!-- 2 -->
-                <div class="col-lg-4 col-md-6">
-
-                    <div class="feature-box">
-
-                        <div class="feature-icon mb-4">
-                            <i class="bi bi-clipboard-data"></i>
-                        </div>
-
-                        <h4 class="fw-bold">
-                            Pencatatan Ternak
-                        </h4>
-
-                        <p class="text-muted">
-                            Peternak dapat mencatat data hewan, berat, pengeluaran, dan perkembangan ternak.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <!-- 3 -->
-                <div class="col-lg-4 col-md-6">
-
-                    <div class="feature-box">
-
-                        <div class="feature-icon mb-4">
-                            <i class="bi bi-shield-check"></i>
-                        </div>
-
-                        <h4 class="fw-bold">
-                            Peternak Terpercaya
-                        </h4>
-
-                        <p class="text-muted">
-                            Data peternak tersimpan dengan jelas sehingga pembeli lebih yakin melakukan transaksi.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- 4 -->
-                <div class="col-lg-4 col-md-6">
-
-                    <div class="feature-box">
-
-                        <div class="feature-icon mb-4">
-                            <i class="bi bi-geo-alt"></i>
-                        </div>
-
-                        <h4 class="fw-bold">
-                            Lokasi Jelas
-                        </h4>
-
-                        <p class="text-muted">
-                            Pembeli dapat mengetahui lokasi peternak sehingga memudahkan pengecekan hewan.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- 5 -->
-                <div class="col-lg-4 col-md-6">
-
-                    <div class="feature-box">
-
-                        <div class="feature-icon mb-4">
-                            <i class="bi bi-tags"></i>
-                        </div>
-
-                        <h4 class="fw-bold">
-                            Harga Transparan
-                        </h4>
-
-                        <p class="text-muted">
-                            Informasi harga ditampilkan secara terbuka sehingga pembeli lebih mudah memilih.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- 6 -->
-                <div class="col-lg-4 col-md-6">
-
-                    <div class="feature-box">
-
-                        <div class="feature-icon mb-4">
-                            <i class="bi bi-card-list"></i>
-                        </div>
-
-                        <h4 class="fw-bold">
-                            Informasi Lengkap
-                        </h4>
-
-                        <p class="text-muted">
-                            Setiap hewan memiliki informasi lengkap mulai dari jenis, ras, berat, dan harga.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-            </div>
-
-        </div>
-
-    </section>
-
-    <!-- TENTANG -->
-    <section class="py-5" id="tentang">
-
-        <div class="container py-5">
-
-            <div class="row align-items-center g-5">
-
-
-                <!-- KIRI -->
-                <div class="col-lg-6">
-
-                    <span class="section-eyebrow">
-                        Tentang TernakApp
-                    </span>
-
-                    <h2 class="section-title mb-4">
-                        Menghubungkan Peternak Lokal Dengan Pembeli Secara Langsung
-                    </h2>
-
-
-                    <p class="text-muted fs-5">
-
-                        TernakApp merupakan marketplace hewan kurban berbasis web
-                        yang membantu mempertemukan pembeli dengan peternak secara langsung.
-                        Melalui sistem ini, peternak dapat memasarkan hewan ternaknya
-                        dengan lebih mudah, sedangkan pembeli dapat memperoleh informasi
-                        hewan secara lengkap dan terpercaya.
-
-                    </p>
-
-
-                    <p class="text-muted fs-5">
-
-                        Mulai dari informasi jenis hewan, ras, berat, harga,
-                        hingga lokasi peternak tersedia dalam satu platform sehingga
-                        proses pencarian hewan kurban menjadi lebih praktis,
-                        transparan, dan terpercaya.
-
-                    </p>
-
-
-                    <a href="#marketplace" class="btn btn-green mt-3">
-
-                        <i class="bi bi-search"></i>
-                        Cari Hewan Sekarang
-
+                <div class="mt-4 d-flex flex-wrap gap-3">
+                    <a href="home.php#marketplace" class="btn btn-green">
+                        Lihat Marketplace
                     </a>
 
-
-                </div>
-
-
-
-                <!-- KANAN -->
-                <div class="col-lg-6">
-
-
-                    <div class="about-card">
-
-
-                        <div class="about-item">
-
-                            <div class="about-icon">
-                                <i class="bi bi-shop"></i>
-                            </div>
-
-                            <div>
-                                <h5>
-                                    Marketplace Lokal
-                                </h5>
-
-                                <p>
-                                    Mempertemukan pembeli dengan peternak sekitar Klaten.
-                                </p>
-                            </div>
-
-                        </div>
-
-
-
-                        <div class="about-item">
-
-                            <div class="about-icon">
-                                <i class="bi bi-file-earmark-text"></i>
-                            </div>
-
-                            <div>
-                                <h5>
-                                    Informasi Lengkap
-                                </h5>
-
-                                <p>
-                                    Data hewan tersedia mulai jenis, ras, berat, dan harga.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-
-
-                        <div class="about-item">
-
-                            <div class="about-icon">
-                                <i class="bi bi-people"></i>
-                            </div>
-
-                            <div>
-                                <h5>
-                                    Mendukung Peternak
-                                </h5>
-
-                                <p>
-                                    Membantu peternak memperluas pemasaran hewan ternak.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                    </div>
-
-
-                </div>
-
-
-            </div>
-
-
-            <!-- STATISTIK -->
-
-            <div class="row mt-5 g-4">
-
-
-                <div class="col-md-4">
-
-                    <div class="about-stat">
-
-                        <h2>
-                            <?= $jumlahHewan ?>+
-                        </h2>
-
-                        <p>
-                            Data Hewan Ternak
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-
-                <div class="col-md-4">
-
-                    <div class="about-stat">
-
-                        <h2>
-                            <?= $jumlahDesa ?>+
-                        </h2>
-
-                        <p>
-                            Desa Terjangkau
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-
-                <div class="col-md-4">
-
-                    <div class="about-stat">
-
-                        <h2>
-                            <?= $jumlahPeternak ?>+
-                        </h2>
-
-                        <p>
-                            Peternak Terdaftar
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-
-            </div>
-
-
-        </div>
-
-    </section>
-
-    <!-- CTA -->
-    <section class="container pb-5">
-
-        <div class="cta-section text-center">
-
-            <h2 class="fw-bold display-5">
-                Punya Ternak Untuk Dijual?
-            </h2>
-
-            <p class="mt-3 mb-4">
-                Gabung menjadi peternak dan mulai pasarkan hewan kurban Anda.
-            </p>
-
-            <button class="btn btn-light btn-lg px-5" data-bs-toggle="modal" data-bs-target="#authModal">
-                Daftar Sekarang
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- FOOTER -->
-    <footer class="site-footer">
-
-        <div class="footer-terrace">
-            <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0,64 C240,10 480,110 720,58 C960,6 1200,96 1440,48 L1440,120 L0,120 Z" class="terrace-layer terrace-1"></path>
-                <path d="M0,90 C240,50 480,120 720,84 C960,48 1200,110 1440,80 L1440,120 L0,120 Z" class="terrace-layer terrace-2"></path>
-                <path d="M0,108 C240,86 480,120 720,104 C960,88 1200,120 1440,102 L1440,120 L0,120 Z" class="terrace-layer terrace-3"></path>
-            </svg>
-        </div>
-
-        <div class="container footer-main">
-
-            <div class="row g-5">
-
-                <div class="col-lg-4 col-md-6">
-                    <a class="footer-brand" href="#home">
-                        <i class="bi bi-gem"></i> TernakApp
+                    <a href="home.php#feature" class="btn btn-outline-custom">
+                        Fitur Peternak 
                     </a>
-                    <p class="footer-desc">
-                        Marketplace hewan kurban tepercaya yang menghubungkan Anda
-                        langsung dengan peternak asli di Klaten &mdash; tanpa
-                        perantara, dengan harga jujur dan kualitas terjaga.
-                    </p>
-
-                    <div class="footer-socials">
-                        <a href="#" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
-                        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-                        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-                        <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
-                    </div>
                 </div>
 
-                <div class="col-lg-2 col-md-6">
-                    <h6 class="footer-heading">Navigasi</h6>
-                    <ul class="footer-links">
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#marketplace">Marketplace</a></li>
-                        <li><a href="#tentang">Tentang</a></li>
-                        <li><a href="#fitur">Fitur Peternak</a></li>
-                    </ul>
-                </div>
+</div>
 
-                <div class="col-lg-3 col-md-6">
-                    <h6 class="footer-heading">Jenis Hewan</h6>
-                    <ul class="footer-links">
-                        <li><a href="#marketplace">Sapi Kurban</a></li>
-                        <li><a href="#marketplace">Kambing Kurban</a></li>
-                        <li><a href="#marketplace">Domba Kurban</a></li>
-                        <li><a href="#marketplace">Ayam &amp; Unggas</a></li>
-                    </ul>
-                </div>
-
-                <div class="col-lg-3 col-md-6">
-                    <h6 class="footer-heading">Hubungi Kami</h6>
-                    <ul class="footer-links footer-contact">
-                        <li><i class="bi bi-geo-alt"></i> Kemalang, Klaten, Jawa Tengah</li>
-                        <li><i class="bi bi-whatsapp"></i> +62 812-0000-0000</li>
-                        <li><i class="bi bi-envelope"></i> halo@ternakapp.id</li>
-                    </ul>
-                </div>
-
-            </div>
-
-            <div class="footer-divider"></div>
-
-            <div class="footer-bottom">
-                <p>&copy; <?php echo date('Y'); ?> TernakApp &mdash; Kemalang, Klaten. Seluruh hak cipta dilindungi.</p>
-                <div class="footer-legal">
-                    <a href="#">Kebijakan Privasi</a>
-                    <span>&middot;</span>
-                    <a href="#">Syarat &amp; Ketentuan</a>
-                </div>
             </div>
 
         </div>
 
-    </footer>
+    </div>
+</section>
+
+<!-- MARKETPLACE -->
+<section class="py-5" id="marketplace">
+
+    <div class="container py-5">
+
+<div class="text-center mb-5">
+
+    <span class="section-eyebrow">
+        Koleksi Pilihan
+    </span>
+
+    <h2 class="section-title">
+        Marketplace Hewan
+    </h2>
+
+    <p class="section-subtitle">
+        Pilih hewan Ternak terbaik langsung dari peternak terpercaya
+    </p>
+
+    <!-- SEARCH -->
+    <div class="search-box shadow-lg">
 
 
-    <!-- MODAL LOGIN REGISTER -->
-    <div class="modal fade" id="authModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 rounded-4 overflow-hidden">
+<form method="GET" action="home.php#marketplace">
 
-                <div class="row g-0">
+<div class="row g-2 align-items-center justify-content-center">
 
-                    <div class="col-lg-5 d-none d-lg-flex bg-success text-white p-5 flex-column justify-content-center">
-                        <h2 class="fw-bold">
-                            TernakApp
-                        </h2>
+    <!-- Desa -->
+    <div class="col-xl col-lg-2 col-md-4">
 
-                        <p class="mt-3">
-                            Kelola ternak, pencatatan, dan penjualan dalam satu dashboard.
-                        </p>
-                    </div>
+        <select name="lokasi" class="form-select">
 
-                    <div class="col-lg-7 p-4 p-lg-5">
+            <option value="">Semua Dusun</option>
 
-                        <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
-                            <li class="nav-item w-50">
-                                <button class="nav-link active w-100" data-bs-toggle="pill" data-bs-target="#loginTab">
-                                    login
-                                </button>
-                            </li>
+            <?php
+            $desa = [
+                "Tasikmadu",
+                "Keputran",
+                "Kembang",
+                "Kalikajar",
+                "Mancasan",
+                "Karang Kembang",
+                "Karang Soko",
+                "Tegalsoko",
+                "Tegal Serut",
+                "Banjaran",
+                "Gatak",
+                "Papringan",
+                "Badran",
+                "Santan",
+                "Kadipolo",
+                "Ngrendet"
+            ];
 
-                            <li class="nav-item w-50">
-                                <button class="nav-link w-100" data-bs-toggle="pill" data-bs-target="#registerTab">
-                                    register
-                                </button>
-                            </li>
-                        </ul>
+            foreach($desa as $d){
+                $selected = (isset($_GET['lokasi']) && $_GET['lokasi']==$d) ? "selected" : "";
+                echo "<option value='$d' $selected>$d</option>";
+            }
+            ?>
 
-                        <div class="tab-content">
+        </select>
 
-                            <!-- LOGIN -->
-                            <div class="tab-pane fade show active" id="loginTab">
+    </div>
 
-                                <form action="auth/login.php" method="POST">
+    <!-- Hewan -->
+    <div class="col-xl col-lg-2 col-md-4">
 
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">Email</label>
-                                        <input type="email" name="email" class="form-control" placeholder="nama@email.com" required>
-                                    </div>
+        <select id="hewan" name="hewan" class="form-select">
 
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">Password</label>
-                                        <div class="input-group">
-                                            <input type="password" name="password" id="loginPassword" class="form-control" placeholder="Masukkan password" required>
-                                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="loginPassword" title="Lihat/Sembunyikan password">
-                                                <i class="bi bi-eye"></i>
-                                            </button>
-                                        </div>
-                                    </div>
+            <option value="">Pilih Hewan</option>
+            <option value="Sapi">Sapi</option>
+            <option value="Kambing">Kambing</option>
+            <option value="Domba">Domba</option>
+            <option value="Burung">Burung</option>
+            <option value="Ayam">Ayam</option>
 
-                                    <button type="submit" name="login" class="btn btn-success w-100 py-3 fw-semibold">
-                                        Masuk Dashboard
-                                    </button>
+        </select>
 
-                                </form>
+    </div>
 
-                            </div>
+    <!-- Ras -->
+    <div class="col-xl col-lg-2 col-md-4">
 
-                            <!-- REGISTER -->
-                            <div class="tab-pane fade" id="registerTab">
+        <select class="form-select" name="ras" id="ras">
 
-                                <form action="auth/register.php" method="POST" id="registerForm">
+            <option value="">Pilih Ras</option>
 
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">Nama Lengkap</label>
-                                        <input type="text" name="nama" class="form-control" placeholder="Nama peternak" required>
-                                    </div>
+        </select>
 
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">Email</label>
-                                        <input type="email" name="email" class="form-control" placeholder="email@contoh.com" required>
-                                    </div>
+    </div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">No WhatsApp</label>
-                                        <input type="text" name="wa" class="form-control" placeholder="08123456789" required>
-                                    </div>
+    <div class="col-xl col-lg-2 col-md-4">
 
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">Dusun</label>
-                                        <input type="text" name="dusun" class="form-control"
-                                            placeholder="Contoh: Tasikmadu" required>
-                                    </div>
+    <select name="peternak" class="form-select">
 
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">Kelurahan</label>
-                                        <input type="text" name="kelurahan" class="form-control"
-                                            placeholder="Contoh: Keputran" required>
-                                    </div>
+        <option value="">Semua Peternak</option>
 
-                                    <div class="row g-2 mb-3">
-                                        <div class="col-6">
-                                            <label class="form-label fw-semibold">Kecamatan</label>
-                                            <input type="text" name="kecamatan" class="form-control bg-light"
-                                                value="Kemalang" readonly>
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="form-label fw-semibold">Kabupaten</label>
-                                            <input type="text" name="kabupaten" class="form-control bg-light"
-                                                value="Klaten" readonly>
-                                        </div>
-                                    </div>
+        <?php
 
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">Password (Min. 6 Karakter)</label>
-                                        <div class="input-group">
-                                            <input type="password" name="password" id="regPassword" class="form-control" placeholder="Buat kata sandi" required minlength="6">
-                                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="regPassword" title="Lihat/Sembunyikan password">
-                                                <i class="bi bi-eye"></i>
-                                            </button>
-                                        </div>
-                                        <div class="progress mt-2" style="height: 4px;">
-                                            <div id="passwordStrengthBar" class="progress-bar bg-danger" role="progressbar" style="width: 0%;"></div>
-                                        </div>
-                                        <small id="passwordStrengthText" class="text-muted" style="font-size: 11px;">Kekuatan password: belum diisi</small>
-                                    </div>
+        $peternak = mysqli_query($conn,"
+            SELECT id, nama 
+            FROM users
+            WHERE role='peternak'
+            ORDER BY nama ASC
+        ");
 
-                                    <div class="mb-4">
-                                        <label class="form-label fw-semibold">Konfirmasi Password</label>
-                                        <div class="input-group">
-                                            <input type="password" name="confirm_password" id="regConfirmPassword" class="form-control" placeholder="Ulangi kata sandi" required minlength="6">
-                                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="regConfirmPassword" title="Lihat/Sembunyikan password">
-                                                <i class="bi bi-eye"></i>
-                                            </button>
-                                        </div>
-                                        <small id="passwordMatchText" class="text-muted" style="font-size: 11px;"></small>
-                                    </div>
+        while($p=mysqli_fetch_assoc($peternak)){
 
-                                    <button type="submit" name="register" id="btnRegisterSubmit" class="btn btn-success w-100 py-3 fw-semibold">
-                                        Daftar Peternak
-                                    </button>
+        ?>
 
-                                </form>
+        <option value="<?= $p['id'] ?>">
+            <?= $p['nama'] ?>
+        </option>
 
-                            </div>
+        <?php } ?>
 
-                        </div>
+    </select>
 
-                    </div>
+</div>
 
-                </div>
+    <!-- Tombol -->
+    <div class="col-xl col-lg-2 col-md-4">
 
-            </div>
+        <button type="submit" class="btn btn-green w-100">
+
+            <i class="bi bi-search"></i>
+        
+
+        </button>
+
+    </div>
+
+</div>
+
+</form>
+
+    </div>
+        </div>
+
+        
+    <!-- CARD -->
+<div class="row g-4">
+
+<?php
+
+// PAGINATION
+$limit = 6; // 9 hewan per halaman
+
+$page = isset($_GET['page']) ? $_GET['page'] : 1;
+
+$start = ($page - 1) * $limit;
+
+
+$where = "WHERE hewan.status_arsip = 0";
+
+
+// FILTER DUSUN
+if(!empty($_GET['lokasi'])){
+
+    $lokasi = mysqli_real_escape_string(
+        $conn,
+        $_GET['lokasi']
+    );
+
+    $where .= "
+    AND users.alamat LIKE '%$lokasi%'
+    ";
+
+}
+
+
+
+// FILTER HEWAN
+if(isset($_GET['hewan']) && $_GET['hewan'] != ''){
+
+    $hewan = mysqli_real_escape_string(
+        $conn,
+        $_GET['hewan']
+    );
+
+    $where .= "
+    AND hewan.nama_hewan LIKE '%$hewan%'
+    ";
+
+}
+
+
+
+// FILTER RAS
+if(!empty($_GET['ras'])){
+
+    $ras = mysqli_real_escape_string(
+        $conn,
+        $_GET['ras']
+    );
+
+    $where .= "
+    AND hewan.ras='$ras'
+    ";
+
+}
+
+
+
+// FILTER PETERNAK
+if(isset($_GET['peternak']) && $_GET['peternak'] != ''){
+
+    $peternak = mysqli_real_escape_string(
+        $conn,
+        $_GET['peternak']
+    );
+
+    $where .= "
+    AND hewan.user_id='$peternak'
+    ";
+
+}
+
+    // HITUNG TOTAL DATA
+
+$count = mysqli_query($conn,"
+SELECT COUNT(*) as total
+FROM hewan
+JOIN users
+ON hewan.user_id = users.id
+$where
+");
+
+$totalData = mysqli_fetch_assoc($count)['total'];
+
+$totalPage = ceil($totalData / $limit);
+
+
+
+// AMBIL DATA SESUAI HALAMAN
+
+$query = mysqli_query($conn,"
+SELECT 
+    hewan.*, 
+    users.nama,
+    users.wa,
+    users.alamat
+
+FROM hewan
+
+JOIN users
+ON hewan.user_id = users.id
+
+$where
+
+ORDER BY hewan.updated_at DESC
+
+LIMIT $start,$limit
+");
+
+// JIKA TIDAK ADA DATA
+if(mysqli_num_rows($query) == 0){
+
+    echo "
+    <div class='col-12 text-center'>
+
+        <div class='alert alert-warning'>
+            Hewan tidak ditemukan
+        </div>
+
+    </div>
+    ";
+}
+
+
+// Hitung jumlah data
+$count = mysqli_query($conn,"
+SELECT COUNT(*) as total
+FROM hewan
+JOIN users
+ON hewan.user_id = users.id
+$where
+");
+
+$totalData = mysqli_fetch_assoc($count)['total'];
+
+$totalPage = ceil($totalData / $limit);
+
+
+
+// JIKA TIDAK ADA DATA
+if(mysqli_num_rows($query)==0){
+
+    echo "
+    <div class='col-12 text-center'>
+        <div class='alert alert-warning'>
+            Hewan tidak ditemukan
+        </div>
+    </div>";
+}
+
+
+// Marketplace
+while($data = mysqli_fetch_assoc($query)){
+
+?>
+
+
+<div class="col-4">
+
+    <div class="card animal-card h-100
+    <?php echo $data['status'] == 'Terjual' ? 'opacity-50' : ''; ?>">
+
+        <div class="position-relative">
+
+    <img src="images/hewan/<?php echo $data['foto']; ?>"
+         class="card-img-top"
+         style="height:250px; object-fit:cover;">
+
+    <?php if($data['status']=='Terjual'){ ?>
+
+        <div class="sold-label">
+            TERJUAL
+        </div>
+
+    <?php } ?>
+
+
+</div>
+
+        <div class="card-body p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <span class="badge 
+        <?php echo $data['status'] == 'Tersedia' ? 'bg-success' : 'bg-danger'; ?>">
+
+            <?php echo $data['status']; ?>
+
+        </span>
+
+<span class="badge-weight">
+    <?php 
+        echo rtrim(rtrim(number_format($data['berat'], 2, ',', '.'), '0'), ',');
+        echo ' ' . $data['satuan_berat'];
+    ?>
+</span>
+
+    </div>
+
+        <?php
+            $desa = trim(explode(',', $data['alamat'])[0]);
+        ?>
+
+    <small class="text-muted">
+        📍 <?php echo $data['alamat']; ?>
+    </small>
+
+    <h4 class="fw-bold mt-3">
+        <?php echo $data['nama_hewan']; ?>
+    </h4>
+
+    <p class="text-success mb-1">
+    <strong>Ras :</strong> <?php echo $data['ras']; ?>
+    </p>
+
+    <p class="text-muted mb-2">
+        <?php echo $data['nama']; ?>
+    </p>
+
+    <div class="price mb-4">
+        Rp <?php echo number_format($data['harga']); ?>
+    </div>
+
+    <div class="d-flex gap-2">
+
+        <a href="detail.php?id=<?php echo $data['id']; ?>"
+           class="btn btn-outline-success w-50">
+
+            Detail
+
+        </a>
+
+        <?php if($data['status'] == 'Tersedia'){ ?>
+
+    <a href="https://wa.me/62<?php echo ltrim($data['wa'],'0'); ?>?text=Saya tertarik dengan <?php echo $data['nama_hewan']; ?>"
+       target="_blank"
+       class="btn btn-success w-50">
+
+        <i class="bi bi-whatsapp"></i>
+
+        Chat
+
+    </a>
+
+<?php } else { ?>
+
+    <button class="btn btn-secondary w-50" disabled>
+
+        Sudah Terjual
+
+    </button>
+
+<?php } ?>
+
+    </div>
+
+   </div>
+
+  </div>
+
+ </div>
+
+<?php } ?>
+
+
+<!-- PAGINATION -->
+
+<div class="col-12">
+
+<nav>
+<ul class="pagination justify-content-center mt-5">
+
+
+<?php if($page > 1){ ?>
+
+<li class="page-item">
+
+<a class="page-link"
+href="?page=<?= $page-1 ?>#marketplace">
+
+Sebelumnya
+
+</a>
+
+</li>
+
+<?php } ?>
+
+
+
+<?php for($i=1;$i<=$totalPage;$i++){ ?>
+
+<li class="page-item <?= ($page==$i)?'active':'' ?>">
+
+<a class="page-link"
+href="?page=<?= $i ?>#marketplace">
+
+<?= $i ?>
+
+</a>
+
+</li>
+
+
+<?php } ?>
+
+
+
+<?php if($page < $totalPage){ ?>
+
+<li class="page-item">
+
+<a class="page-link"
+href="?page=<?= $page+1 ?>#marketplace">
+
+Selanjutnya
+
+</a>
+
+</li>
+
+<?php } ?>
+
+
+</ul>
+</nav>
+
+</div>
+
+
+
+</section>
+
+</section>
+
+<!-- FEATURES -->
+<section class="pb-5" id="feature">
+
+<div class="container pb-5">
+
+<div class="text-center mb-5">
+
+<span class="section-eyebrow">
+Keunggulan TernakApp
+</span>
+
+<h2 class="section-title">
+Solusi Mudah Mengelola dan Menjual Hewan Ternak
+</h2>
+
+<p class="section-subtitle">
+TernakApp membantu peternak memasarkan hewan kurban,
+mengelola data ternak, serta mempertemukan pembeli
+langsung dengan peternak terpercaya.
+</p>
+
+</div>
+
+
+<div class="row g-4">
+
+
+<!-- 1 -->
+<div class="col-lg-4 col-md-6">
+
+<div class="feature-box">
+
+<div class="feature-icon mb-4">
+<i class="bi bi-whatsapp"></i>
+</div>
+
+<h4 class="fw-bold">
+Chat Langsung
+</h4>
+
+<p class="text-muted">
+Pembeli dapat menghubungi peternak langsung melalui WhatsApp tanpa perantara.
+</p>
+
+</div>
+
+</div>
+
+
+<!-- 2 -->
+<div class="col-lg-4 col-md-6">
+
+<div class="feature-box">
+
+<div class="feature-icon mb-4">
+<i class="bi bi-clipboard-data"></i>
+</div>
+
+<h4 class="fw-bold">
+Pencatatan Ternak
+</h4>
+
+<p class="text-muted">
+Peternak dapat mencatat data hewan, berat, pengeluaran, dan perkembangan ternak.
+</p>
+
+</div>
+
+</div>
+
+
+<!-- 3 -->
+<div class="col-lg-4 col-md-6">
+
+<div class="feature-box">
+
+<div class="feature-icon mb-4">
+<i class="bi bi-shield-check"></i>
+</div>
+
+<h4 class="fw-bold">
+Peternak Terpercaya
+</h4>
+
+<p class="text-muted">
+Data peternak tersimpan dengan jelas sehingga pembeli lebih yakin melakukan transaksi.
+</p>
+
+</div>
+
+</div>
+
+
+
+<!-- 4 -->
+<div class="col-lg-4 col-md-6">
+
+<div class="feature-box">
+
+<div class="feature-icon mb-4">
+<i class="bi bi-geo-alt"></i>
+</div>
+
+<h4 class="fw-bold">
+Lokasi Jelas
+</h4>
+
+<p class="text-muted">
+Pembeli dapat mengetahui lokasi peternak sehingga memudahkan pengecekan hewan.
+</p>
+
+</div>
+
+</div>
+
+
+
+<!-- 5 -->
+<div class="col-lg-4 col-md-6">
+
+<div class="feature-box">
+
+<div class="feature-icon mb-4">
+<i class="bi bi-tags"></i>
+</div>
+
+<h4 class="fw-bold">
+Harga Transparan
+</h4>
+
+<p class="text-muted">
+Informasi harga ditampilkan secara terbuka sehingga pembeli lebih mudah memilih.
+</p>
+
+</div>
+
+</div>
+
+
+
+<!-- 6 -->
+<div class="col-lg-4 col-md-6">
+
+<div class="feature-box">
+
+<div class="feature-icon mb-4">
+<i class="bi bi-card-list"></i>
+</div>
+
+<h4 class="fw-bold">
+Informasi Lengkap
+</h4>
+
+<p class="text-muted">
+Setiap hewan memiliki informasi lengkap mulai dari jenis, ras, berat, dan harga.
+</p>
+
+</div>
+
+</div>
+
+
+</div>
+
+</div>
+
+</section>
+
+<!-- TENTANG -->
+<section class="py-5" id="tentang">
+
+<div class="container py-5">
+
+<div class="row align-items-center g-5">
+
+
+<!-- KIRI -->
+<div class="col-lg-6">
+
+<span class="section-eyebrow">
+Tentang TernakApp
+</span>
+
+<h2 class="section-title mb-4">
+Menghubungkan Peternak Lokal Dengan Pembeli Secara Langsung
+</h2>
+
+
+<p class="text-muted fs-5">
+
+TernakApp merupakan marketplace hewan ternak berbasis web
+yang membantu mempertemukan pembeli dengan peternak secara langsung.
+Melalui sistem ini, peternak dapat memasarkan hewan ternaknya
+dengan lebih mudah, sedangkan pembeli dapat memperoleh informasi
+hewan secara lengkap dan terpercaya.
+
+</p>
+
+
+<p class="text-muted fs-5">
+
+Mulai dari informasi jenis hewan, ras, berat, harga,
+hingga lokasi peternak tersedia dalam satu platform sehingga
+proses pencarian hewan ternak menjadi lebih praktis,
+transparan, dan terpercaya.
+
+</p>
+
+
+<a href="#marketplace" class="btn btn-green mt-3">
+
+<i class="bi bi-search"></i>
+Cari Hewan Sekarang
+
+</a>
+
+
+</div>
+
+
+
+<!-- KANAN -->
+<div class="col-lg-6">
+
+
+<div class="about-card">
+
+
+<div class="about-item">
+
+<div class="about-icon">
+<i class="bi bi-shop"></i>
+</div>
+
+<div>
+<h5>
+Marketplace Lokal
+</h5>
+
+<p>
+Mempertemukan pembeli dengan peternak sekitar Klaten.
+</p>
+</div>
+
+</div>
+
+
+
+<div class="about-item">
+
+<div class="about-icon">
+<i class="bi bi-file-earmark-text"></i>
+</div>
+
+<div>
+<h5>
+Informasi Lengkap
+</h5>
+
+<p>
+Data hewan tersedia mulai jenis, ras, berat, dan harga.
+</p>
+
+</div>
+
+</div>
+
+
+
+
+<div class="about-item">
+
+<div class="about-icon">
+<i class="bi bi-people"></i>
+</div>
+
+<div>
+<h5>
+Mendukung Peternak
+</h5>
+
+<p>
+Membantu peternak memperluas pemasaran hewan ternak.
+</p>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+<!-- STATISTIK -->
+
+<div class="row mt-5 g-4">
+
+
+<div class="col-md-4">
+
+<div class="about-stat">
+
+<h2>
+<?= $jumlahHewan ?>+
+</h2>
+
+<p>
+Data Hewan Ternak
+</p>
+
+</div>
+
+</div>
+
+
+
+<div class="col-md-4">
+
+<div class="about-stat">
+
+<h2>
+<?= $jumlahDesa ?>+
+</h2>
+
+<p>
+Desa Terjangkau
+</p>
+
+</div>
+
+</div>
+
+
+
+<div class="col-md-4">
+
+<div class="about-stat">
+
+<h2>
+<?= $jumlahPeternak ?>+
+</h2>
+
+<p>
+Peternak Terdaftar
+</p>
+
+</div>
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+</section>
+
+<!-- CTA -->
+<section class="container pb-5">
+
+    <div class="cta-section text-center">
+
+        <h2 class="fw-bold display-5">
+            Punya Ternak Untuk Dijual?
+        </h2>
+
+        <p class="mt-3 mb-4">
+            Gabung menjadi peternak dan mulai pasarkan hewan ternak Anda.
+        </p>
+
+        <button class="btn btn-light btn-lg px-5" data-bs-toggle="modal" data-bs-target="#authModal">
+            Daftar Sekarang
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- FOOTER -->
+<footer class="site-footer">
+
+    <div class="footer-terrace">
+        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,64 C240,10 480,110 720,58 C960,6 1200,96 1440,48 L1440,120 L0,120 Z" class="terrace-layer terrace-1"></path>
+            <path d="M0,90 C240,50 480,120 720,84 C960,48 1200,110 1440,80 L1440,120 L0,120 Z" class="terrace-layer terrace-2"></path>
+            <path d="M0,108 C240,86 480,120 720,104 C960,88 1200,120 1440,102 L1440,120 L0,120 Z" class="terrace-layer terrace-3"></path>
+        </svg>
+    </div>
+
+    <div class="container footer-main">
+
+        <div class="row g-5">
+
+    <div class="col-12">
+        <a class="footer-brand" href="#home">
+            <i></i>🐄TernakApp
+        </a>
+        <p class="footer-desc">
+            Marketplace hewan ternak tepercaya yang menghubungkan Anda
+            langsung dengan peternak asli di Klaten &mdash; tanpa
+            perantara, dengan harga jujur dan kualitas terjaga.
+        </p>
+
+        <div class="footer-socials">
+            <a href="#" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+            <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+            <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <div class="col-6 col-lg-4">
+    <h6 class="footer-heading">Navigasi</h6>
+    <ul class="footer-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#marketplace">Marketplace</a></li>
+        <li><a href="#tentang">Tentang</a></li>
+        <li><a href="#fitur">Fitur Peternak</a></li>
+    </ul>
+</div>
 
-    <script>
-        window.addEventListener('scroll', function() {
+<div class="col-6 col-lg-4">
+    <h6 class="footer-heading">Jenis Hewan</h6>
+    <ul class="footer-links">
+        <li><a href="#marketplace">Sapi Kurban</a></li>
+        <li><a href="#marketplace">Kambing Kurban</a></li>
+        <li><a href="#marketplace">Domba Kurban</a></li>
+        <li><a href="#marketplace">Ayam &amp; Unggas</a></li>
+    </ul>
+</div>
 
-            const navbar = document.querySelector('.navbar');
+<div class="col-12 col-lg-4">
+    <h6 class="footer-heading">Hubungi Kami</h6>
+    <ul class="footer-links footer-contact">
+        <li><i class="bi bi-geo-alt"></i> Tasikmadu, Keputran, Kemalang, Klaten, Jawa Tengah</li>
+        <li><i class="bi bi-whatsapp"></i> +62 878-9127-0590</li>
+        <li><i class="bi bi-envelope"></i> anakputu8@gmail.com</li>
+    </ul>
+</div>
 
-            if (window.scrollY > 50) {
-                navbar.classList.add('navbar-scrolled');
-            } else {
-                navbar.classList.remove('navbar-scrolled');
-            }
+        <div class="footer-divider"></div>
 
-        });
+        <div class="footer-bottom" id="footer">
 
-        // tilt 3D ringan untuk kartu hewan
-        document.querySelectorAll('.animal-card').forEach(function(card) {
-            card.addEventListener('mousemove', function(e) {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const rotateX = ((y / rect.height) - 0.5) * -8;
-                const rotateY = ((x / rect.width) - 0.5) * 8;
-                card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px)`;
-            });
-            card.addEventListener('mouseleave', function() {
-                card.style.transform = '';
-            });
-        });
+    <p>
+        &copy; <?php echo date('Y'); ?> TernakApp &mdash;
+        Kemalang, Klaten. Seluruh hak cipta dilindungi.
+    </p>
 
-        const dataRas = {
+    <div class="footer-legal">
 
-            "Sapi": [
-                "Limosin",
-                "Simental",
-                "Jawa",
-                "Brahman",
-                "Bali",
-                "Madura"
-            ],
+        <a href="kebijakan-privasi.php">
+            Kebijakan Privasi
+        </a>
 
-            "Kambing": [
-                "Jawa",
-                "Etawa",
-                "Kacang",
-                "Boer",
-                "Boerka"
-            ],
+        <span>&middot;</span>
 
-            "Domba": [
-                "Garut",
-                "Merino",
-                "Texel",
-                "Ekor Tipis"
-            ],
+        <a href="syarat-ketentuan.php">
+            Syarat &amp; Ketentuan
+        </a>
+
+    </div>
+
+</div>
+
+    </div>
+
+</footer>
 
 
-            "Ayam": [
-                "Kampung",
-                "Bangkok",
-                "Cemani"
-            ],
+<!-- MODAL LOGIN REGISTER -->
+<div class="modal fade" id="authModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 overflow-hidden">
 
-            "Burung": [
-                "Murai",
-                "Lovebird",
-                "Kenari",
-                "Perkutut",
-                "Kacer",
-                "Kenari",
-                "Prenjak",
-                "cucakhijau"
-            ]
+            <div class="row g-0">
 
-        };
+                <div class="col-lg-5 d-none d-lg-flex bg-success text-white p-5 flex-column justify-content-center">
+                    <h2 class="fw-bold">
+                        TernakApp
+                    </h2>
 
-        const hewan = document.getElementById("hewan");
-        const ras = document.getElementById("ras");
+                    <p class="mt-3">
+                        Kelola ternak, pencatatan, dan penjualan dalam satu dashboard.
+                    </p>
+                </div>
 
-        hewan.onchange = function() {
+                <div class="col-lg-7 p-4 p-lg-5">
 
-            ras.innerHTML = "<option value=''>Pilih Ras</option>";
+                    <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
+                        <li class="nav-item w-50">
+                            <button class="nav-link active w-100" data-bs-toggle="pill" data-bs-target="#loginTab">
+                                login
+                            </button>
+                        </li>
 
-            if (dataRas[this.value]) {
+                        <li class="nav-item w-50">
+                            <button class="nav-link w-100" data-bs-toggle="pill" data-bs-target="#registerTab">
+                                register
+                            </button>
+                        </li>
+                    </ul>
 
-                dataRas[this.value].forEach(function(item) {
+                    <div class="tab-content">
 
-                    ras.innerHTML += `<option value="${item}">${item}</option>`;
+<!-- LOGIN -->
+    <div class="tab-pane fade show active" id="loginTab">
 
-                });
+        <form action="auth/login.php" method="POST">
 
-            }
+    <div class="mb-3">
+        <label>Email</label>
+        <input type="email" name="email" class="form-control" required>
+    </div>
 
-            fetchMarketplace(1);
+    <div class="mb-3">
+        <label>Password</label>
+        <input type="password" name="password" class="form-control" required>
+    </div>
 
-        };
+    <button type="submit" name="login" class="btn btn-success w-100 py-3">
+        Masuk Dashboard
+    </button>
 
-        // ==========================================
-        // Live AJAX Search & Filter Marketplace
-        // ==========================================
-        const filterForm = document.getElementById('filterForm');
-        const marketplaceGrid = document.getElementById('marketplaceGrid');
-        const marketplaceLoader = document.getElementById('marketplaceLoader');
-        const btnResetFilter = document.getElementById('btnResetFilter');
+</form>
 
-        function bindCardTilt() {
-            document.querySelectorAll('.animal-card').forEach(function(card){
-                card.addEventListener('mousemove', function(e){
-                    const rect = card.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const rotateX = ((y / rect.height) - 0.5) * -8;
-                    const rotateY = ((x / rect.width) - 0.5) * 8;
-                    card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px)`;
-                });
-                card.addEventListener('mouseleave', function(){
-                    card.style.transform = '';
-                });
-            });
-        }
+</div>
 
-        async function fetchMarketplace(page = 1) {
-            const formData = new FormData(filterForm);
-            const params = new URLSearchParams(formData);
-            params.set('page', page);
+<!-- REGISTER -->
+    <div class="tab-pane fade" id="registerTab">
 
-            // Update URL browser tanpa me-refresh halaman
-            const newUrl = window.location.pathname + '?' + params.toString() + '#marketplace';
-            window.history.pushState({ path: newUrl }, '', newUrl);
+        <form action="auth/register.php" method="POST">
 
-            if (marketplaceLoader) marketplaceLoader.style.display = 'block';
-            if (marketplaceGrid) marketplaceGrid.style.opacity = '0.35';
+        <div class="mb-3">
+            <label>Nama</label>
+            <input type="text" name="nama" class="form-control" required>
+        </div>
 
-            try {
-                const response = await fetch('ajax_marketplace.php?' + params.toString());
-                if (response.ok) {
-                    const html = await response.text();
-                    if (marketplaceGrid) {
-                        marketplaceGrid.innerHTML = html;
-                        bindCardTilt();
-                        attachPaginationEvents();
-                    }
-                }
-            } catch (err) {
-                console.warn('Gagal memuat data marketplace asinkron:', err);
-            } finally {
-                if (marketplaceLoader) marketplaceLoader.style.display = 'none';
-                if (marketplaceGrid) marketplaceGrid.style.opacity = '1';
-            }
-        }
+        <div class="mb-3">
+            <label>Email</label>
+            <input type="email" name="email" class="form-control" required>
+        </div>
 
-        function attachPaginationEvents() {
-            document.querySelectorAll('.ajax-page-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetPage = this.getAttribute('data-page') || 1;
-                    fetchMarketplace(targetPage);
-                    const marketElem = document.getElementById('marketplace');
-                    if (marketElem) {
-                        marketElem.scrollIntoView({ behavior: 'smooth' });
-                    }
-                });
-            });
-        }
+        <div class="mb-3">
+            <label>No WhatsApp</label>
+            <input type="text" name="wa" class="form-control" required>
+        </div>
 
-        // Live filter listener untuk select selain dropdown hewan
-        document.querySelectorAll('.live-filter').forEach(select => {
-            if (select.id !== 'hewan') {
-                select.addEventListener('change', function() {
-                    fetchMarketplace(1);
-                });
-            }
-        });
+        <div class="mb-3">
+    <label>Dusun</label>
+    <input type="text" name="dusun" class="form-control"
+           placeholder="Contoh: Tasikmadu" required>
+</div>
 
-        if (filterForm) {
-            filterForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                fetchMarketplace(1);
-            });
-        }
+<div class="mb-3">
+    <label>Kelurahan</label>
+    <input type="text" name="kelurahan" class="form-control"
+           placeholder="Contoh: Keputran" required>
+</div>
 
-        if (btnResetFilter) {
-            btnResetFilter.addEventListener('click', function() {
-                filterForm.reset();
-                document.getElementById('ras').innerHTML = "<option value=''>Pilih Ras</option>";
-                fetchMarketplace(1);
-            });
-        }
+<div class="mb-3">
+    <label>Kecamatan</label>
+    <input type="text" name="kecamatan" class="form-control"
+           value="Kemalang" readonly>
+</div>
 
-        // Inisialisasi awal
-        bindCardTilt();
-        attachPaginationEvents();
+<div class="mb-3">
+    <label>Kabupaten</label>
+    <input type="text" name="kabupaten" class="form-control"
+           value="Klaten" readonly>
+</div>
 
-        // Registrasi Service Worker PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('sw.js')
-                    .then(function(registration) {
-                        console.log('TernakApp Service Worker registered with scope:', registration.scope);
-                    })
-                    .catch(function(error) {
-                        console.warn('TernakApp Service Worker registration failed:', error);
-                    });
-            });
-        }
+<div class="mb-3">
 
-        // Penanganan Tombol Install PWA (A2HS)
-        let deferredPrompt;
-        const pwaInstallNav = document.getElementById('pwaInstallNav');
-        const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+    <div class="mb-3">
+        <label>Password</label>
+        <input type="password" name="password" class="form-control" required>
+    </div>
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            if (pwaInstallNav) {
-                pwaInstallNav.style.display = 'block';
-            }
-        });
+    <button type="submit" name="register" class="btn btn-success w-100 py-3">
+        Daftar
+    </button>
 
-        if (pwaInstallBtn) {
-            pwaInstallBtn.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                        console.log('Pengguna menyetujui instalasi PWA TernakApp');
-                    }
-                    deferredPrompt = null;
-                    pwaInstallNav.style.display = 'none';
-                }
-            });
-        }
+</form>
 
-        window.addEventListener('appinstalled', () => {
-            console.log('TernakApp PWA berhasil di-install');
-            if (pwaInstallNav) {
-                pwaInstallNav.style.display = 'none';
-            }
-        });
+                        </div>
 
-        // ==========================================
-        // Toggle Show / Hide Password
-        // ==========================================
-        document.querySelectorAll('.toggle-password').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const targetId = this.getAttribute('data-target');
-                const targetInput = document.getElementById(targetId);
-                const icon = this.querySelector('i');
-                if (targetInput) {
-                    if (targetInput.type === 'password') {
-                        targetInput.type = 'text';
-                        icon.classList.remove('bi-eye');
-                        icon.classList.add('bi-eye-slash');
-                    } else {
-                        targetInput.type = 'password';
-                        icon.classList.remove('bi-eye-slash');
-                        icon.classList.add('bi-eye');
-                    }
-                }
-            });
-        });
+                    </div>
 
-        // ==========================================
-        // Password Strength & Match Validator
-        // ==========================================
-        const regPassword = document.getElementById('regPassword');
-        const regConfirmPassword = document.getElementById('regConfirmPassword');
-        const passwordStrengthBar = document.getElementById('passwordStrengthBar');
-        const passwordStrengthText = document.getElementById('passwordStrengthText');
-        const passwordMatchText = document.getElementById('passwordMatchText');
-        const registerForm = document.getElementById('registerForm');
+                </div>
 
-        if (regPassword) {
-            regPassword.addEventListener('input', function() {
-                const val = this.value;
-                let score = 0;
-                if (val.length >= 6) score += 25;
-                if (val.length >= 10) score += 25;
-                if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score += 25;
-                if (/[0-9]/.test(val) || /[^A-Za-z0-9]/.test(val)) score += 25;
+            </div>
 
-                passwordStrengthBar.style.width = score + '%';
-                if (score === 0) {
-                    passwordStrengthBar.className = 'progress-bar bg-danger';
-                    passwordStrengthText.textContent = 'Kekuatan password: belum diisi';
-                    passwordStrengthText.className = 'text-muted';
-                } else if (score <= 25) {
-                    passwordStrengthBar.className = 'progress-bar bg-danger';
-                    passwordStrengthText.textContent = 'Kekuatan: Sangat Lemah (min. 6 karakter)';
-                    passwordStrengthText.className = 'text-danger';
-                } else if (score <= 50) {
-                    passwordStrengthBar.className = 'progress-bar bg-warning';
-                    passwordStrengthText.textContent = 'Kekuatan: Cukup (tambahkan kombinasi huruf & angka)';
-                    passwordStrengthText.className = 'text-warning';
-                } else if (score <= 75) {
-                    passwordStrengthBar.className = 'progress-bar bg-info';
-                    passwordStrengthText.textContent = 'Kekuatan: Baik';
-                    passwordStrengthText.className = 'text-info';
-                } else {
-                    passwordStrengthBar.className = 'progress-bar bg-success';
-                    passwordStrengthText.textContent = 'Kekuatan: Sangat Kuat & Aman';
-                    passwordStrengthText.className = 'text-success';
-                }
+        </div>
+    </div>
+</div>
 
-                checkPasswordMatch();
-            });
-        }
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-        function checkPasswordMatch() {
-            if (!regConfirmPassword || !regPassword) return;
-            const passVal = regPassword.value;
-            const confirmVal = regConfirmPassword.value;
+<script>
 
-            if (!confirmVal) {
-                passwordMatchText.textContent = '';
-                return;
-            }
+window.addEventListener('scroll', function() {
 
-            if (passVal === confirmVal) {
-                passwordMatchText.textContent = '✓ Password cocok';
-                passwordMatchText.className = 'text-success fw-semibold';
-            } else {
-                passwordMatchText.textContent = '✗ Password belum cocok';
-                passwordMatchText.className = 'text-danger fw-semibold';
-            }
-        }
+    const navbar = document.querySelector('.navbar');
 
-        if (regConfirmPassword) {
-            regConfirmPassword.addEventListener('input', checkPasswordMatch);
-        }
+    if(window.scrollY > 50) {
+        navbar.classList.add('navbar-scrolled');
+    } else {
+        navbar.classList.remove('navbar-scrolled');
+    }
 
-        if (registerForm) {
-            registerForm.addEventListener('submit', function(e) {
-                if (regPassword.value !== regConfirmPassword.value) {
-                    e.preventDefault();
-                    alert('Konfirmasi password tidak cocok dengan password yang dimasukkan!');
-                    regConfirmPassword.focus();
-                }
-            });
-        }
-    </script>
+});
+
+// tilt 3D ringan untuk kartu hewan
+document.querySelectorAll('.animal-card').forEach(function(card){
+    card.addEventListener('mousemove', function(e){
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const rotateX = ((y / rect.height) - 0.5) * -8;
+        const rotateY = ((x / rect.width) - 0.5) * 8;
+        card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px)`;
+    });
+    card.addEventListener('mouseleave', function(){
+        card.style.transform = '';
+    });
+});
+
+const dataRas = {
+
+"Sapi":[
+"Limosin",
+"Simental",
+"Jawa",
+"Brahman",
+"Bali",
+"Madura"
+],
+
+"Kambing":[
+"Jawa",
+"Etawa",
+"Kacang",
+"Boer",
+"Boerka"
+],
+
+"Domba":[
+"Garut",
+"Merino",
+"Texel",
+"Ekor Tipis"
+],
+
+
+"Ayam":[
+"Kampung",
+"Bangkok",
+"Cemani"
+],
+
+"Burung":[
+"Murai",
+"Lovebird",
+"Kenari",
+"Perkutut",
+"Kacer",
+"Kenari",
+"Prenjak",
+"cucakhijau"
+]
+
+};
+
+const hewan=document.getElementById("hewan");
+const ras=document.getElementById("ras");
+
+hewan.onchange=function(){
+
+ras.innerHTML="<option value=''>Pilih Ras</option>";
+
+if(dataRas[this.value]){
+
+dataRas[this.value].forEach(function(item){
+
+ras.innerHTML+=`<option value="${item}">${item}</option>`;
+
+});
+
+}
+
+};
+
+</script>
+
 
 </body>
-
 </html>
